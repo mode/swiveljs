@@ -20,7 +20,7 @@
       dataset = d3.csv("datasets/chart_colors.csv", chartColorsAccessor, function(dataset) {
         var swivel = new Swivel(dataset);
         var byColors = swivel.groupBy('colors', 'chart_type')
-        var pivotByChartType = byColors.pivotLeft('chart_type', Swivel.Grouping.sum('all_charts'));
+        var pivotByChartType = byColors.pivotLeft('chart_type', Swivel.Agg.sum('all_charts'));
 
         console.log(pivotByChartType);
       });
@@ -31,8 +31,8 @@
         var pivot = new Swivel(dataset.content);
 
         var map = pivot.groupBy('team', 'season')
-          .select(Swivel.Grouping.count('yards'))
-          .select(Swivel.Grouping.average('yards'))
+          .select(Swivel.Agg.count('yards'))
+          .select(Swivel.Agg.average('yards'))
           .pivotBy('season')
           .where('season', function(season) { return season > 1980; })
 
@@ -40,13 +40,13 @@
 
         // Row
         var byTeam = pivot.groupBy('team');
-        var pivotByTeam = byTeam.pivotLeft('team', Swivel.Grouping.sum('yards'));
+        var pivotByTeam = byTeam.pivotLeft('team', Swivel.Agg.sum('yards'));
 
         console.log("pivotByTeam", pivotByTeam);
 
         // Row + Column
         var byTeamSeason = pivot.groupBy('team', 'season');
-        var pivotByTeamSeason = byTeamSeason.pivotLeft('season', Swivel.Grouping.count('yards'));
+        var pivotByTeamSeason = byTeamSeason.pivotLeft('season', Swivel.Agg.count('yards'));
 
         // p without argument pivots the last field
         // swivel.g('team', 'season').c().v(Swivel.Grouping.sum('yards'))
