@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+
+    <script src="swivel.js"></script>
+  </head>
+
+  <body>
+    <script type="text/javascript">
+      var chartColorsAccessor = function(row) {
+        return {
+          'colors': row.colors,
+          'chart_type': row.chart_type,
+          'all_charts': parseInt(row.all_charts)
+        }
+      };
+
+      dataset = d3.csv("datasets/chart_colors.csv", chartColorsAccessor, function(dataset) {
+        var swivel = new Swivel(dataset);
+        var byColors = swivel.groupBy('colors', 'chart_type')
+        var pivotByChartType = byColors.pivotLeft('chart_type', Swivel.Grouping.sum('all_charts'));
+
+        console.log(pivotByChartType);
+      });
+
+      d3.json('datasets/nfl_large.json', function(dataset) {
+        console.log(dataset);
+
+        var pivot = new Swivel(dataset.content);
+
+        // Row
+        var byTeam = pivot.groupBy('team');
+        var pivotByTeam = byTeam.pivotLeft('team', Swivel.Grouping.sum('yards'));
+
+        console.log("pivotByTeam", pivotByTeam);
+
+        // Row + Column
+        console.log(Date.now());
+        var byTeamSeason = pivot.groupBy('team', 'season');
+        console.log(Date.now());
+        var pivotByTeamSeason = byTeamSeason.pivotLeft('season', Swivel.Grouping.count('yards'));
+        console.log(Date.now());
+
+        // p without argument pivots the last field
+        // swivel.g('team', 'season').c().v(Swivel.Grouping.sum('yards'))
+        // swivel.g('team', 'season').r('team').c('season').v(...)
+        // swivel.g('team', 'season')
+
+        // internally we'll build a full traversal map and then run through it
+        // for columns we'll loop over and extend the row, for rows we'll loop over
+        // and add rows to the set and whichever field we're on we'll do the right thing
+
+        console.log("pivotByTeamSeason", pivotByTeamSeason);
+      });
+    </script>
+  </body>
+</html>
