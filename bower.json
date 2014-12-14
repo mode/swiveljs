@@ -1,10 +1,10 @@
 {
-  "name": "Swivel",
+  "name": "swivel",
   "version": "0.0.1",
   "dependencies": {
     "jquery": "~2.1.1"
   },
-  "main": "Swivel.js",
+  "main": "swivel.js",
   "homepage": "https://github.com/mode/swiveljs",
   "authors": [
     "Josh Ferguson <josh@modeanalytics.com>"
