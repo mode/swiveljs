@@ -1,0 +1,25 @@
+{
+  "name": "Swivel",
+  "version": "0.0.1",
+  "dependencies": {
+    "jquery": "~2.1.1"
+  },
+  "main": "Swivel.js",
+  "homepage": "https://github.com/mode/swiveljs",
+  "authors": [
+    "Josh Ferguson <josh@modeanalytics.com>"
+  ],
+  "description": "We pivot so you don't have to",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
