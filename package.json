@@ -29,6 +29,7 @@
     "gulp-rename": "*",
     "gulp-uglify": "*",
     "gulp-filesize": "*",
-    "gulp-continuous-concat": "*"
+    "gulp-continuous-concat": "*",
+    "gulp-connect": "*"
   }
 }
