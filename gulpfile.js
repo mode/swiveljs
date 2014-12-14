@@ -9,7 +9,7 @@ var filesize = require('gulp-filesize');
 var connect = require('gulp-connect');
 
 var distDir = 'dist';
-var demoDir = 'demo/javascripts';
+var demoDir = 'demo';
 
 gulp.task('connect', function() {
   return connect.server({
