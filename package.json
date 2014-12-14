@@ -1,0 +1,34 @@
+{
+  "name": "swivel",
+  "version": "0.0.1",
+  "description": "We pivot so you don't have to",
+  "main": "swivel.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mode/swiveljs.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mode/swiveljs/issues"
+  },
+  "homepage": "https://github.com/mode/swiveljs",
+
+  "devDependencies": {
+    "gulp": "~3.8.10",
+    "gulp-watch": "*",
+    "gulp-clean": "*",
+    "gulp-concat": "*",
+    "gulp-mocha": "*",
+    "gulp-rename": "*",
+    "gulp-uglify": "*",
+    "gulp-filesize": "*",
+    "gulp-continuous-concat": "*"
+  }
+}
