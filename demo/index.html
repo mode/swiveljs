@@ -30,6 +30,14 @@
 
         var pivot = new Swivel(dataset.content);
 
+        var map = pivot.groupBy('team', 'season')
+          .select(Swivel.Grouping.count('yards'))
+          .select(Swivel.Grouping.average('yards'))
+          .pivotBy('season')
+          .where('season', function(season) { return season > 1980; })
+
+          console.log(map);
+
         // Row
         var byTeam = pivot.groupBy('team');
         var pivotByTeam = byTeam.pivotLeft('team', Swivel.Grouping.sum('yards'));
@@ -37,11 +45,8 @@
         console.log("pivotByTeam", pivotByTeam);
 
         // Row + Column
-        console.log(Date.now());
         var byTeamSeason = pivot.groupBy('team', 'season');
-        console.log(Date.now());
         var pivotByTeamSeason = byTeamSeason.pivotLeft('season', Swivel.Grouping.count('yards'));
-        console.log(Date.now());
 
         // p without argument pivots the last field
         // swivel.g('team', 'season').c().v(Swivel.Grouping.sum('yards'))

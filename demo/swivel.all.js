@@ -6,6 +6,11 @@ Swivel.Grouping = function(pivot, fields) {
 };
 
 Swivel.Grouping.prototype = {
+  select: function() {
+    var map = new Swivel.Map(this.fields);
+    return map.select.apply(map, arguments);
+  },
+
   groupAll: function() {
     var fields = this.fields;
     var groups = this._groups;
@@ -378,21 +383,41 @@ Swivel.prototype = {
   }
 };
 
-Swivel.Map = function(grouping) {
-  this.fields = [];
+Swivel.Map = function(fields) {
+  this.values   = [];
   this.fieldMap = {};
+  this.fields   = fields;
+
+  for(var i = 0; i < fields.length; i++) {
+    this.fieldMap[fields[i]] = { orientation: 'r', filters: [] }
+  }
 };
 
 Swivel.Map.prototype = {
-  select: function(values) {
+  select: function() {
+    var args = Swivel.Util.toArray(arguments);
+    this.values = this.values.concat(args);
     return this;
   },
 
-  pivotBy: function(fields) {
+  pivotBy: function() {
+    var pivotFields = [].concat(Array.prototype.slice.call(arguments, 0));
+
+    // Reset Orientation
+    for(var i = 0; i < this.fields.length; i++) {
+      this.getField(this.fields[i]).orientation = 'r';
+    }
+
+    // Set Pivot Fields to 'c' (column)
+    for(var i = 0; i < pivotFields.length; i++) {
+      this.getField(pivotFields[i]).orientation = 'c';
+    }
+
     return this;
   },
 
-  where: function(field, filter) {
+  where: function(fieldName, filter) {
+    this.getField(fieldName).filters.push(filter);
     return this;
   },
 
@@ -408,3 +433,9 @@ Swivel.Map.prototype = {
     return this.fieldMap[this.fields[fieldIndex]];
   }
 }
+
+Swivel.Util = {
+  toArray: function(args) {
+    return Array.prototype.slice.call(args, 0);
+  }
+};

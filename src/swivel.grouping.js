@@ -6,6 +6,11 @@ Swivel.Grouping = function(pivot, fields) {
 };
 
 Swivel.Grouping.prototype = {
+  select: function() {
+    var map = new Swivel.Map(this.fields);
+    return map.select.apply(map, arguments);
+  },
+
   groupAll: function() {
     var fields = this.fields;
     var groups = this._groups;
