@@ -5,6 +5,7 @@ swivel.tree = function(fields) {
   var _tree = {
     insert: insert,
     getRoot: getRoot,
+    getValues: getValues,
     eachValue: eachValue,
     eachGroup: eachGroup
   };
@@ -12,6 +13,10 @@ swivel.tree = function(fields) {
   // Public
   function getRoot() {
     return root;
+  };
+
+  function getValues(fieldName) {
+    return values[fieldName];
   };
 
   function insert(row, rowIdx) {

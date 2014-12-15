@@ -42,11 +42,19 @@ swivel.traveler = function(tree, map) {
   function all() {
     insertAll();
 
+    var result = {
+      values: function(fieldName) {
+        return Object.keys(tree.getValues(fieldName));
+      }
+    };
+
     if(map.hasRows()) {
-      return visitRows(tree.getRoot(), 0);
+      result['data'] = visitRows(tree.getRoot(), 0);
     } else {
-      return visitColumn(tree.getRoot(), 0);
+      result['data'] = visitColumn(tree.getRoot(), 0);
     }
+
+    return result;
   }
 
   // Private

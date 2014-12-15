@@ -182,11 +182,19 @@ swivel.traveler = function(tree, map) {
   function all() {
     insertAll();
 
+    var result = {
+      values: function(fieldName) {
+        return Object.keys(tree.getValues(fieldName));
+      }
+    };
+
     if(map.hasRows()) {
-      return visitRows(tree.getRoot(), 0);
+      result['data'] = visitRows(tree.getRoot(), 0);
     } else {
-      return visitColumn(tree.getRoot(), 0);
+      result['data'] = visitColumn(tree.getRoot(), 0);
     }
+
+    return result;
   }
 
   // Private
@@ -307,6 +315,7 @@ swivel.tree = function(fields) {
   var _tree = {
     insert: insert,
     getRoot: getRoot,
+    getValues: getValues,
     eachValue: eachValue,
     eachGroup: eachGroup
   };
@@ -314,6 +323,10 @@ swivel.tree = function(fields) {
   // Public
   function getRoot() {
     return root;
+  };
+
+  function getValues(fieldName) {
+    return values[fieldName];
   };
 
   function insert(row, rowIdx) {
