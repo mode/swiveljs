@@ -1,9 +1,5 @@
-swivel.countUnique = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-
-  return function(rows, group) {
+swivel.countUnique = function(field) {
+  return function(rows) {
     var values = {};
     for(var r = 0; r < rows.length; r++) {
       var value = rows[r][field];
@@ -13,8 +9,6 @@ swivel.countUnique = function(field, fieldName) {
       }
     }
 
-    var value = {};
-    value[fieldName] = Object.keys(values).length;
-    return value;
+    return Object.keys(values).length;
   };
 };

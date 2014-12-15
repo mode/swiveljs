@@ -1,8 +1,4 @@
-swivel.stddev = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-  
+swivel.stddev = function(field) {
   var average = function(rows) {
     var sum = 0;
     for(var i = 0; i < rows.length; i++) {
@@ -35,8 +31,6 @@ swivel.stddev = function(field, fieldName) {
     }
     var avgSqDiff = sqDiffSum / diffs.length;
 
-    var value = {}
-    value[fieldName] = Math.sqrt(avgSqDiff);
-    return value;
+    return Math.sqrt(avgSqDiff);
   };
 };

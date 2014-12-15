@@ -1,26 +1,21 @@
-swivel.sum = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-
-  return function(rows, group) {
+swivel.sum = function(field) {
+  return function(rows) {
     var sum = 0;
+
     for(var r = 0; r < rows.length; r++) {
       var value = rows[r][field];
 
       if(value === NaN) {
-        sum = NaN;
+        return NaN;
         break;
       } else if(typeof value !== 'number') {
-        sum = NaN;
+        return NaN;
         break;
       } else {
         sum += value;
       }
     }
 
-    var value = {}
-    value[fieldName] = sum;
-    return value;
+    return sum;
   };
 };

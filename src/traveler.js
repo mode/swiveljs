@@ -45,7 +45,7 @@ swivel.traveler = function(tree, map) {
     if(map.hasRows()) {
       return visitRows(tree.getRoot(), 0);
     } else {
-      return visitColumns(tree.getRoot(), 0);
+      return visitColumn(tree.getRoot(), 0);
     }
   }
 
@@ -98,9 +98,18 @@ swivel.traveler = function(tree, map) {
       if(typeof(node) === 'undefined') { // No branch at this value
         colValue[value] = null;
       } else if(nextFieldIdx == fieldNames.length) { // No more fields
-        colValue[value] = visitValues(node);
+         var values = visitValues(node);
+
+        // Lift single values up to the higher level (make optional)
+        var valueKeys = Object.keys(values);
+        if(valueKeys.length == 1) {
+          colValue[value] = values[valueKeys[0]];
+        } else {
+          colValue[value] = values;
+        }
+
       } else if(nextField.isRow()) {
-        colValue[value] = visitRow(node, nextFieldIdx);
+        colValue[value] = visitRows(node, nextFieldIdx);
       } else if(nextField.isColumn()) {
         colValue[value] = visitColumn(node, nextFieldIdx);
       }
@@ -117,79 +126,19 @@ swivel.traveler = function(tree, map) {
       rows.push(_data[node[i]]);
     }
 
-    var values = {};
+    var values     = {};
     var selections = map.getValues();
     var aliases    = Object.keys(selections);
 
     for(var i = 0; i < aliases.length; i++) {
       var alias = aliases[i];
-      var aggregate = selections[alias];
+      var aggFn = selections[alias];
 
-      values[alias] = aggregate(rows);
+      values[alias] = aggFn(rows);
     }
 
     return values;
-  }
-
-  // fields needs to be only the fields we want to recurse on
-
-  // function pivotLeft(pivotField, callback) {
-  //   if(typeof callback === 'undefined') {
-  //     callback = swivel.count();
-  //   }
-  //
-  //   var flattened = [];
-  //   var groups    = _groups;
-  //
-  //   // Bisect fields by the pivotField
-  //   var fieldIdx    = fields.indexOf(pivotField);
-  //   var leftFields  = fields.slice(0, fieldIdx);
-  //   var rightFields = fields.slice(fieldIdx);
-  //
-  //   var self = this;
-  //   var pivotKeys = Object.keys(_values[pivotField]);
-  //   eachGroup({}, groups, leftFields, 0, function(groups, group) {
-  //     var pivotRow = {};
-  //
-  //     for(var k = 0; k < pivotKeys.length; k++) {
-  //       var groupNode = groups[pivotKeys[k]];
-  //
-  //       if(typeof groupNode === 'undefined') {
-  //         pivotRow[pivotKeys[k]] = null;
-  //       } else {
-  //         //var rowIdxs   = self.collectIndexes(groupNode, rightFields, 0);
-  //         var rowIdxs   = [];
-  //         var values    = callback(fetchRows(rowIdxs), group);
-  //         var valueKeys = Object.keys(values);
-  //
-  //         if(valueKeys.length == 1) {
-  //           var firstKey = valueKeys[0];
-  //           pivotRow[pivotKeys[k]] = values[firstKey];
-  //         } else {
-  //           pivotRow[pivotKeys[k]] = values
-  //         }
-  //       }
-  //     }
-  //
-  //     var row = {};
-  //     $.extend(row, group, pivotRow);
-  //     flattened.push(row);
-  //   });
-  //
-  //   return flattened;
-  // };
-  //
-  //
-  // function fetchRows(rowIndexes) {
-  //   var rows = [];
-  //   for(var i = 0; i < rowIndexes.length; i++) {
-  //     var idx = rowIndexes[i];
-  //     rows.push(parent.rows[idx]);
-  //   }
-  //   return rows;
-  // };
-
-  // DO THE TRAVELING
+  };
 
   return _traveler;
 };

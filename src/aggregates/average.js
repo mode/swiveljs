@@ -1,20 +1,14 @@
-swivel.average = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-
+swivel.average = function(field) {
   return function(rows, group) {
-    var value = {}
+    var value = NaN;
 
-    if(rows.length == 0) {
-      value[fieldName] = NaN;
-    } else {
+    if(rows.length > 0) {
       var sum = 0;
       for(var r = 0; r < rows.length; r++) {
         sum += rows[r][field];
       }
 
-      value[fieldName] = sum / rows.length;
+      value = sum / rows.length;
     }
 
     return value;

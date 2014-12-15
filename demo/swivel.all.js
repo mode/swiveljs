@@ -197,7 +197,7 @@ swivel.traveler = function(tree, map) {
     if(map.hasRows()) {
       return visitRows(tree.getRoot(), 0);
     } else {
-      return visitColumns(tree.getRoot(), 0);
+      return visitColumn(tree.getRoot(), 0);
     }
   }
 
@@ -250,9 +250,18 @@ swivel.traveler = function(tree, map) {
       if(typeof(node) === 'undefined') { // No branch at this value
         colValue[value] = null;
       } else if(nextFieldIdx == fieldNames.length) { // No more fields
-        colValue[value] = visitValues(node);
+         var values = visitValues(node);
+
+        // Lift single values up to the higher level (make optional)
+        var valueKeys = Object.keys(values);
+        if(valueKeys.length == 1) {
+          colValue[value] = values[valueKeys[0]];
+        } else {
+          colValue[value] = values;
+        }
+
       } else if(nextField.isRow()) {
-        colValue[value] = visitRow(node, nextFieldIdx);
+        colValue[value] = visitRows(node, nextFieldIdx);
       } else if(nextField.isColumn()) {
         colValue[value] = visitColumn(node, nextFieldIdx);
       }
@@ -269,79 +278,19 @@ swivel.traveler = function(tree, map) {
       rows.push(_data[node[i]]);
     }
 
-    var values = {};
+    var values     = {};
     var selections = map.getValues();
     var aliases    = Object.keys(selections);
 
     for(var i = 0; i < aliases.length; i++) {
       var alias = aliases[i];
-      var aggregate = selections[alias];
+      var aggFn = selections[alias];
 
-      values[alias] = aggregate(rows);
+      values[alias] = aggFn(rows);
     }
 
     return values;
-  }
-
-  // fields needs to be only the fields we want to recurse on
-
-  // function pivotLeft(pivotField, callback) {
-  //   if(typeof callback === 'undefined') {
-  //     callback = swivel.count();
-  //   }
-  //
-  //   var flattened = [];
-  //   var groups    = _groups;
-  //
-  //   // Bisect fields by the pivotField
-  //   var fieldIdx    = fields.indexOf(pivotField);
-  //   var leftFields  = fields.slice(0, fieldIdx);
-  //   var rightFields = fields.slice(fieldIdx);
-  //
-  //   var self = this;
-  //   var pivotKeys = Object.keys(_values[pivotField]);
-  //   eachGroup({}, groups, leftFields, 0, function(groups, group) {
-  //     var pivotRow = {};
-  //
-  //     for(var k = 0; k < pivotKeys.length; k++) {
-  //       var groupNode = groups[pivotKeys[k]];
-  //
-  //       if(typeof groupNode === 'undefined') {
-  //         pivotRow[pivotKeys[k]] = null;
-  //       } else {
-  //         //var rowIdxs   = self.collectIndexes(groupNode, rightFields, 0);
-  //         var rowIdxs   = [];
-  //         var values    = callback(fetchRows(rowIdxs), group);
-  //         var valueKeys = Object.keys(values);
-  //
-  //         if(valueKeys.length == 1) {
-  //           var firstKey = valueKeys[0];
-  //           pivotRow[pivotKeys[k]] = values[firstKey];
-  //         } else {
-  //           pivotRow[pivotKeys[k]] = values
-  //         }
-  //       }
-  //     }
-  //
-  //     var row = {};
-  //     $.extend(row, group, pivotRow);
-  //     flattened.push(row);
-  //   });
-  //
-  //   return flattened;
-  // };
-  //
-  //
-  // function fetchRows(rowIndexes) {
-  //   var rows = [];
-  //   for(var i = 0; i < rowIndexes.length; i++) {
-  //     var idx = rowIndexes[i];
-  //     rows.push(parent.rows[idx]);
-  //   }
-  //   return rows;
-  // };
-
-  // DO THE TRAVELING
+  };
 
   return _traveler;
 };
@@ -454,23 +403,17 @@ swivel.util.argArray = function(args) {
   return Array.prototype.slice.call(args, 0);
 };
 
-swivel.average = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-
+swivel.average = function(field) {
   return function(rows, group) {
-    var value = {}
+    var value = NaN;
 
-    if(rows.length == 0) {
-      value[fieldName] = NaN;
-    } else {
+    if(rows.length > 0) {
       var sum = 0;
       for(var r = 0; r < rows.length; r++) {
         sum += rows[r][field];
       }
 
-      value[fieldName] = sum / rows.length;
+      value = sum / rows.length;
     }
 
     return value;
@@ -478,17 +421,13 @@ swivel.average = function(field, fieldName) {
 };
 
 swivel.count = function() {
-  return function(rows, group) {
-    return {'count': rows.length};
-  }
+  return function(rows) {
+    return rows.length;
+  };
 };
 
-swivel.countUnique = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-
-  return function(rows, group) {
+swivel.countUnique = function(field) {
+  return function(rows) {
     var values = {};
     for(var r = 0; r < rows.length; r++) {
       var value = rows[r][field];
@@ -498,43 +437,33 @@ swivel.countUnique = function(field, fieldName) {
       }
     }
 
-    var value = {};
-    value[fieldName] = Object.keys(values).length;
-    return value;
+    return Object.keys(values).length;
   };
 };
 
-swivel.median = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-
-  return function(rows, group) {
+swivel.median = function(field) {
+  return function(rows) {
     var values = [];
     for(var r = 0; r < rows.length; r++) {
       values.push(rows[r][field]);
     }
 
-    var value = {};
+    var value = NaN;
 
     values.sort( function(a,b) { return a - b; } );
     var midPoint = Math.floor(values.length / 2);
 
     if(values.length % 2) {
-      value[fieldName] = values[midPoint];
+      value = values[midPoint];
     } else {
-      value[fieldName] = values[midPoint - 1] + values[midPoint] / 2.0;
+      value = values[midPoint - 1] + values[midPoint] / 2.0;
     }
 
     return value;
   };
 };
 
-swivel.stddev = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-  
+swivel.stddev = function(field) {
   var average = function(rows) {
     var sum = 0;
     for(var i = 0; i < rows.length; i++) {
@@ -567,35 +496,28 @@ swivel.stddev = function(field, fieldName) {
     }
     var avgSqDiff = sqDiffSum / diffs.length;
 
-    var value = {}
-    value[fieldName] = Math.sqrt(avgSqDiff);
-    return value;
+    return Math.sqrt(avgSqDiff);
   };
 };
 
-swivel.sum = function(field, fieldName) {
-  if(typeof fieldName === 'undefined') {
-    fieldName = field;
-  }
-
-  return function(rows, group) {
+swivel.sum = function(field) {
+  return function(rows) {
     var sum = 0;
+
     for(var r = 0; r < rows.length; r++) {
       var value = rows[r][field];
 
       if(value === NaN) {
-        sum = NaN;
+        return NaN;
         break;
       } else if(typeof value !== 'number') {
-        sum = NaN;
+        return NaN;
         break;
       } else {
         sum += value;
       }
     }
 
-    var value = {}
-    value[fieldName] = sum;
-    return value;
+    return sum;
   };
 };
