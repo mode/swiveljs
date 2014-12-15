@@ -1,9 +1,7 @@
 swivel.map = function(fields) {
-  var selects  = {};
   var fieldMap = {};
 
   var _map = {
-    select: select,
     pivots: pivots,
 
     hasRows: hasRows,
@@ -26,12 +24,6 @@ swivel.map = function(fields) {
   }
 
   // Public
-
-  function select(aggFn, alias) {
-    selects[alias] = aggFn;
-
-    return this;
-  };
 
   function pivots() {
     var args = swivel.args(arguments);

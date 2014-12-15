@@ -1,26 +1,18 @@
-//
-// this won't work because data and tree can be instantiated at different times
-//
 swivel.traveler = function(tree, map) {
-  var rows = [];
-  var wheres = [];
+  var rows    = [];
+  var wheres  = [];
+  var selects = {};
 
   // Return Object
   var _traveler = {
-    select: select,
     pivots: pivots,
     data: data,
     where: where,
+    select: select,
     all: all,
   };
 
   // Public
-
-  function select() {
-    map.select.apply(map, arguments);
-
-    return this;
-  };
 
   function pivots() {
     map.pivots.apply(map, arguments);
@@ -37,6 +29,12 @@ swivel.traveler = function(tree, map) {
 
   function where(whereFn) {
     wheres.push(whereFn);
+
+    return this;
+  };
+
+  function select(aggFn, alias) {
+    selects[alias] = aggFn;
 
     return this;
   };
@@ -147,7 +145,6 @@ swivel.traveler = function(tree, map) {
     }
 
     var values  = {};
-    var selects = map.getSelects();
     var aliases = Object.keys(selects);
 
     for(var i = 0; i < aliases.length; i++) {
