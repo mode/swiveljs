@@ -1,36 +1,30 @@
-Swivel.Grouping = function(pivot, fields) {
-  this._groups = {};
-  this._values = {};
-  this._parent = pivot;
-  this.fields  = fields;
-};
+swivel.groupBy = function(_parent, fields) {
+  var _groups = {};
+  var _values = {};
 
-Swivel.Grouping.prototype = {
-  select: function() {
-    var map = new Swivel.Map(this.fields);
+  function select() {
+    var map = swivel.map(fields)
     return map.select.apply(map, arguments);
-  },
+  };
 
-  groupAll: function() {
-    var fields = this.fields;
-    var groups = this._groups;
-    var rows   = this._parent.rows;
+  function groupAll() {
+    var groups = _groups;
+    var rows   = _parent.rows;
 
     for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-      this.insertRow(groups, rows[rowIdx], rowIdx, fields, 0);
+      insertRow(groups, rows[rowIdx], rowIdx, fields, 0);
     }
 
     return this;
-  },
+  };
 
-  pivotLeft: function(pivotField, callback) {
+  function pivotLeft(pivotField, callback) {
     if(typeof callback === 'undefined') {
-      callback = Swivel.Grouping.Count();
+      callback = swivel.count();
     }
 
     var flattened = [];
-    var fields    = this.fields;
-    var groups    = this._groups;
+    var groups    = _groups;
 
     // Bisect fields by the pivotField
     var fieldIdx    = fields.indexOf(pivotField);
@@ -38,8 +32,8 @@ Swivel.Grouping.prototype = {
     var rightFields = fields.slice(fieldIdx);
 
     var self = this;
-    var pivotKeys = Object.keys(self._values[pivotField]);
-    this.eachGroup({}, groups, leftFields, 0, function(groups, group) {
+    var pivotKeys = Object.keys(_values[pivotField]);
+    eachGroup({}, groups, leftFields, 0, function(groups, group) {
       var pivotRow = {};
 
       for(var k = 0; k < pivotKeys.length; k++) {
@@ -48,8 +42,9 @@ Swivel.Grouping.prototype = {
         if(typeof groupNode === 'undefined') {
           pivotRow[pivotKeys[k]] = null;
         } else {
-          var rowIdxs   = self.collectIndexes(groupNode, rightFields, 0);
-          var values    = callback(self.fetchRows(rowIdxs), group);
+          //var rowIdxs   = self.collectIndexes(groupNode, rightFields, 0);
+          var rowIdxs   = [];
+          var values    = callback(fetchRows(rowIdxs), group);
           var valueKeys = Object.keys(values);
 
           if(valueKeys.length == 1) {
@@ -67,25 +62,25 @@ Swivel.Grouping.prototype = {
     });
 
     return flattened;
-  },
+  };
 
-  insertRow: function(groups, row, rowIdx, fields, fieldIdx) {
+  function insertRow(groups, row, rowIdx, fields, fieldIdx) {
     var field      = fields[fieldIdx];
     var value      = row[fields[fieldIdx]];
     var isLeafNode = (fieldIdx + 1 == fields.length);
 
     // Insert Field
 
-    if(!(field in this._values)) {
-      this._values[field] = {};
+    if(!(field in _values)) {
+      _values[field] = {};
     }
 
     // Update Field Count
 
-    if(!(value in this._values[field])) {
-      this._values[field][value] = 1;
+    if(!(value in _values[field])) {
+      _values[field][value] = 1;
     } else {
-      this._values[field][value] += 1;
+      _values[field][value] += 1;
     }
 
     // Insert Group
@@ -104,17 +99,17 @@ Swivel.Grouping.prototype = {
     if(isLeafNode) {
       groups[value].push(rowIdx);
     } else {
-      this.insertRow(groups[value], row, rowIdx, fields, fieldIdx + 1);
+      insertRow(groups[value], row, rowIdx, fields, fieldIdx + 1);
     }
-  },
+  };
 
-  eachGroup: function(group, groups, fields, fieldIdx, callback) {
+  function eachGroup(group, groups, fields, fieldIdx, callback) {
     if(fieldIdx == fields.length) {
       return callback(groups, group);
     }
 
     var field  = fields[fieldIdx];
-    var counts = this._values[field];
+    var counts = _values[field];
     var values = Object.keys(counts).sort();
 
     // add to group and recurse
@@ -124,18 +119,24 @@ Swivel.Grouping.prototype = {
 
       if(typeof groupValue !== "undefined") {
         group[field] = value;
-        this.eachGroup(group, groupValue, fields, fieldIdx + 1, callback);
+        eachGroup(group, groupValue, fields, fieldIdx + 1, callback);
         delete group[field];
       }
     }
-  },
+  };
 
-  fetchRows: function(rowIndexes) {
+  function fetchRows(rowIndexes) {
     var rows = [];
     for(var i = 0; i < rowIndexes.length; i++) {
       var idx = rowIndexes[i];
-      rows.push(this._parent.rows[idx]);
+      rows.push(_parent.rows[idx]);
     }
     return rows;
-  }
+  };
+
+  return {
+    select: select,
+    groupAll: groupAll,
+    pivotLeft: pivotLeft,
+  };
 };

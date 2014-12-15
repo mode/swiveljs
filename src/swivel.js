@@ -52,17 +52,16 @@ The name of the field in the flattened row, defaults to <field>
 */
 
 function swivel(rows) {
-  this.rows = rows;
-
-  function groupBy() {
-    var fields = Array.prototype.slice.call(arguments);
-    return (new Swivel.Grouping(this, fields)).groupAll();
-  }
-
-  return {
+  var _swivel = {
     rows: rows,
     groupBy: groupBy
-  }
-};
+  };
 
-Swivel = {};
+  function groupBy() {
+    var fields = swivel.util.argArray(arguments);
+    // return swivel.grouping(this, fields)
+    return (swivel.groupBy(_swivel, fields)).groupAll();
+  }
+
+  return _swivel;
+};
