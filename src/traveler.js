@@ -2,8 +2,7 @@
 // this won't work because data and tree can be instantiated at different times
 //
 swivel.traveler = function(tree, map) {
-  // Map
-  var _data     = [];
+  var _data = [];
 
   // Return Object
   var _traveler = {
@@ -43,18 +42,39 @@ swivel.traveler = function(tree, map) {
   function all() {
     tree.insert(_data);
 
+    console.log(tree.getRoot());
+
+    visitRows(tree.getRoot(), 0);
     // iterate and return the things
   }
 
   // Private
 
-  function visitRow() {
+  function visitRows(node, fieldIdx) {
+    var rows = [];
 
+    var rowFields  = [];
+    var fieldNames = map.getFieldNames();
+    for(var i = fieldIdx; i < fieldNames.length; i++) {
+      if(map.getFieldByIndex(i).orientation == 'r') {
+        rowFields.push(fieldNames[i]);
+      } else {
+        break;
+      }
+    }
+
+    tree.eachGroup({}, node, rowFields, 0, function(node, branch) {
+      console.log(branch);
+    });
+
+    return rows;
   }
 
   function visitColumn() {
 
   }
+
+  // fields needs to be only the fields we want to recurse on
 
   // function pivotLeft(pivotField, callback) {
   //   if(typeof callback === 'undefined') {
@@ -102,27 +122,6 @@ swivel.traveler = function(tree, map) {
   //   return flattened;
   // };
   //
-  // function eachGroup(group, groups, fields, fieldIdx, callback) {
-  //   if(fieldIdx == fields.length) {
-  //     return callback(groups, group);
-  //   }
-  //
-  //   var field  = fields[fieldIdx];
-  //   var counts = _values[field];
-  //   var values = Object.keys(counts).sort();
-  //
-  //   // add to group and recurse
-  //   for(var v = 0; v < values.length; v++) {
-  //     var value = values[v];
-  //     var groupValue = groups[value];
-  //
-  //     if(typeof groupValue !== "undefined") {
-  //       group[field] = value;
-  //       eachGroup(group, groupValue, fields, fieldIdx + 1, callback);
-  //       delete group[field];
-  //     }
-  //   }
-  // };
   //
   // function fetchRows(rowIndexes) {
   //   var rows = [];

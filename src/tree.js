@@ -3,10 +3,15 @@ swivel.tree = function(fields) {
   var values = {};
 
   var _tree = {
-    insert: insert
+    getRoot: getRoot,
+    insert: insert,
+    eachGroup: eachGroup,
   };
 
   // Public
+  function getRoot() {
+    return root;
+  };
 
   function insert(rows) {
     for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
@@ -14,6 +19,28 @@ swivel.tree = function(fields) {
     }
 
     return this;
+  };
+
+  function eachGroup(branch, node, fields, fieldIdx, callback) {
+    if(fieldIdx == fields.length) {
+      return callback(node, branch);
+    }
+
+    var field     = fields[fieldIdx];
+    var counts    = values[field];
+    var valueKeys = Object.keys(counts);
+
+    // add to group and recurse
+    for(var v = 0; v < valueKeys.length; v++) {
+      var valueKey = valueKeys[v];
+      var childNode = node[valueKey];
+
+      if(typeof childNode !== "undefined") {
+        branch[field] = valueKey;
+        eachGroup(branch, childNode, fields, fieldIdx + 1, callback);
+        delete branch[field];
+      }
+    }
   };
 
   // Private
@@ -53,7 +80,7 @@ swivel.tree = function(fields) {
     if(isLeafNode) {
       node[value].push(rowIdx);
     } else {
-      insert(node[value], row, rowIdx, fields, fieldIdx + 1);
+      insertOne(node[value], row, rowIdx, fields, fieldIdx + 1);
     }
   };
 

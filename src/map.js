@@ -5,7 +5,11 @@ swivel.map = function(fields) {
   var _map = {
     select: select,
     pivot: pivot,
-    where: where
+    where: where,
+    
+    getField: getField,
+    getFieldNames: getFieldNames,
+    getFieldByIndex: getFieldByIndex
   };
 
   for(var i = 0; i < fields.length; i++) {
@@ -42,7 +46,11 @@ swivel.map = function(fields) {
     return this;
   };
 
-  // Private
+  // Accessors
+
+  function getFieldNames() {
+    return fields;
+  };
 
   function getField(fieldName) {
     return fieldMap[fieldName];
