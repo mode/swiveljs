@@ -21,3 +21,17 @@ table thead td {
 table tbody td {
   text-align:right;
 }
+
+#pivot-settings > div {
+  float:left;
+  width:100px;
+  padding-bottom:15px;
+}
+
+#pivot-settings > div#pivot-values {
+  width:250px;
+}
+
+#pivot-settings div.settings-label {
+  margin-bottom:5px;
+}

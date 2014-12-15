@@ -13,8 +13,50 @@
   </head>
 
   <body>
-    <h3>Pivot Table Example</h3>
+    <h1>Pivot Table Example</h1>
     <p>Total events by day for each location</p>
+
+    <form id="pivot-settings">
+      <div>
+        <div class="settings-label">Rows</div>
+
+        <select>
+          <option>Day</option>
+          <option>Device</option>
+          <option>Location</option>
+        </select>
+      </div>
+
+      <div>
+        <div class="settings-label">Columns</div>
+
+        <select>
+          <option>Day</option>
+          <option>Device</option>
+          <option>Location</option>
+        </select>
+      </div>
+
+      <div id="pivot-values">
+        <div class="settings-label">Values</div>
+
+        <select>
+          <option>Day</option>
+          <option>Device</option>
+          <option>Location</option>
+          <option>Events</option>
+        </select>
+
+        <select>
+          <option>Sum</option>
+          <option>Count</option>
+          <option>Unique</option>
+          <option>Average</option>
+          <option>Median</option>
+          <option>Standard Deviation</option>
+        </select>
+      </div>
+    </form>
 
     <div id="pivot-container"></div>
 
