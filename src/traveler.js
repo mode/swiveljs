@@ -88,7 +88,7 @@ swivel.traveler = function(tree, map) {
     var nextField = map.getFieldByIndex(nextFieldIdx);
     tree.eachGroup({}, node, currFields, 0, function(node, branch) {
       var row = {};
-      $.extend(row, branch);
+      swivel.merge(row, branch);
 
       // no more fields available
       if(nextFieldIdx == fieldNames.length) {
