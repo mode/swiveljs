@@ -1,152 +1,18 @@
 swivel.groupBy = function(parent, fields) {
-  var _groups = {};
-  var _values = {};
-
   var _groupBy = {
-    select: select,
-    groupAll: groupAll,
-    pivotLeft: pivotLeft,
-  };
-
-  function select() {
-    var map = swivel.map(fields)
-    return map.select.apply(map, arguments);
+    groupAll: groupAll
   };
 
   function groupAll() {
-    var groups = _groups;
-    var rows   = parent.rows;
-
-    for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-      insertRow(groups, rows[rowIdx], rowIdx, fields, 0);
-    }
-
-    return this;
-  };
-
-  function pivotLeft(pivotField, callback) {
-    if(typeof callback === 'undefined') {
-      callback = swivel.count();
-    }
-
-    var flattened = [];
-    var groups    = _groups;
-
-    // Bisect fields by the pivotField
-    var fieldIdx    = fields.indexOf(pivotField);
-    var leftFields  = fields.slice(0, fieldIdx);
-    var rightFields = fields.slice(fieldIdx);
-
-    var self = this;
-    var pivotKeys = Object.keys(_values[pivotField]);
-    eachGroup({}, groups, leftFields, 0, function(groups, group) {
-      var pivotRow = {};
-
-      for(var k = 0; k < pivotKeys.length; k++) {
-        var groupNode = groups[pivotKeys[k]];
-
-        if(typeof groupNode === 'undefined') {
-          pivotRow[pivotKeys[k]] = null;
-        } else {
-          //var rowIdxs   = self.collectIndexes(groupNode, rightFields, 0);
-          var rowIdxs   = [];
-          var values    = callback(fetchRows(rowIdxs), group);
-          var valueKeys = Object.keys(values);
-
-          if(valueKeys.length == 1) {
-            var firstKey = valueKeys[0];
-            pivotRow[pivotKeys[k]] = values[firstKey];
-          } else {
-            pivotRow[pivotKeys[k]] = values
-          }
-        }
-      }
-
-      var row = {};
-      $.extend(row, group, pivotRow);
-      flattened.push(row);
-    });
-
-    return flattened;
-  };
-
-  function insertRow(groups, row, rowIdx, fields, fieldIdx) {
-    var field      = fields[fieldIdx];
-    var value      = row[fields[fieldIdx]];
-    var isLeafNode = (fieldIdx + 1 == fields.length);
-
-    // Insert Field
-
-    if(!(field in _values)) {
-      _values[field] = {};
-    }
-
-    // Update Field Count
-
-    if(!(value in _values[field])) {
-      _values[field][value] = 1;
-    } else {
-      _values[field][value] += 1;
-    }
-
-    // Insert Group
-
-    if(!(value in groups)) {
-      if(isLeafNode) {
-        groups[value] = [];
-      } else {
-        groups[value] = {};
-      }
-    }
-
-    // Terminate: Insert Row Index
-    // Continue:  Recurse Into Field List
-
-    if(isLeafNode) {
-      groups[value].push(rowIdx);
-    } else {
-      insertRow(groups[value], row, rowIdx, fields, fieldIdx + 1);
-    }
-  };
-
-  function eachGroup(group, groups, fields, fieldIdx, callback) {
-    if(fieldIdx == fields.length) {
-      return callback(groups, group);
-    }
-
-    var field  = fields[fieldIdx];
-    var counts = _values[field];
-    var values = Object.keys(counts).sort();
-
-    // add to group and recurse
-    for(var v = 0; v < values.length; v++) {
-      var value = values[v];
-      var groupValue = groups[value];
-
-      if(typeof groupValue !== "undefined") {
-        group[field] = value;
-        eachGroup(group, groupValue, fields, fieldIdx + 1, callback);
-        delete group[field];
-      }
-    }
-  };
-
-  function fetchRows(rowIndexes) {
-    var rows = [];
-    for(var i = 0; i < rowIndexes.length; i++) {
-      var idx = rowIndexes[i];
-      rows.push(parent.rows[idx]);
-    }
-    return rows;
+    return swivel.tree(fields).insert(parent.rows);
   };
 
   return _groupBy;
 };
 
-swivel.map = function(fields) {
+swivel.map = function(parent, fields) {
   var values   = [];
   var fieldMap = {};
-  var fields   = fields;
 
   var _map = {
     select: select,
@@ -154,8 +20,6 @@ swivel.map = function(fields) {
     where: where,
     all: all
   };
-
-  console.log(fields);
 
   for(var i = 0; i < fields.length; i++) {
     fieldMap[fields[i]] = { orientation: 'r', filters: [] }
@@ -171,7 +35,8 @@ swivel.map = function(fields) {
 
   function select() {
     values = values.concat(swivel.util.argArray(arguments));
-    return _map;
+
+    return this;
   };
 
   function pivotBy() {
@@ -187,17 +52,17 @@ swivel.map = function(fields) {
       getField(pivotFields[i]).orientation = 'c';
     }
 
-    return _map;
+    return this;
   };
 
   function where(fieldName, filter) {
     getField(fieldName).filters.push(filter);
-    return _map;
+
+    return this;
   };
 
   function all() {
-    // parent.groupAll().traverse()
-    // DO THE DAMN THANG
+    return swivel.traveler(parent.groupAll(), this).visitAll();
   };
 
   return _map;
@@ -205,71 +70,239 @@ swivel.map = function(fields) {
 
 /*
 
-Usage:
+  Usage:
 
-1. Create a new swivel
+  1. Create a new swivel
 
-var Swivel = new Swivel(dataset);
+    var swizzle = swivel(dataset);
 
-2. Group the swivel by a subset of available fields
+  2. Group the swivel by a subset of available fields
 
-var byFields = Swivel.groupBy(<field1>[, <field2>, ...]);
+    var byFields = swizzle.groupBy(<fieldName1>[, <fieldName2>, ...]);
 
-3. Pivot the grouping by a given field by flattening all fields to the left
+  3. Pivot the grouping by a given field by flattening all fields to the left
 
-var pivotByField = byFields.pivotLeft(<field>[, <callback>]);
+    var pivotByField = byFields.pivotLeft(<fieldName>[, <callback>]);
 
-<callback>(rows[, group])
-A function that takes as its arguments an array of rows for each distinct
-group of field values in the grouping. Second parameter is an object with
-the group fields and values for those fields.
+    <callback>(rows)
+      A function that takes as its arguments an array of rows for each distinct
+      group of field values in the grouping. Second parameter is an object with
+      the group fields and values for those fields.
 
-Returns a javascript object representing the set of values to be included
-in the flattened row.
+      Returns a javascript object representing the set of values to be included
+      in the flattened row.
 
-Defaults to Swivel.Grouping.Count
+      Defaults to swivel.count
 
-Example:
+  Example:
 
-d3.json('dataset.json', function(dataset) {
-var swivel = new Swivel(dataset.content);
-var byTeamSeason = swivel.groupBy('team', 'season');
-var pivotByTeamSeason = byTeamSeason.pivotLeft('season');
+    d3.json('dataset.json', function(dataset) {
+      var swizzle = swivel(dataset.content);
+      var byTeamSeason = swizzle.groupBy('team', 'season');
+      var pivotByTeamSeason = byTeamSeason.pivotLeft('season');
 
-console.log("pivotByTeamSeason", pivotByTeamSeason);
-});
+      console.log("pivotByTeamSeason", pivotByTeamSeason);
+    });
 
-Built-in Aggregates:
+  Built-in Aggregates:
 
-Swivel.Grouping.count()
-Swivel.Grouping.countUnique(<field>[, <fieldName>])
+    swivel.count()
+    swivel.countUnique(<field>[, <alias>])
 
-Swivel.Grouping.sum(<field>[, <fieldName>])
-Swivel.Grouping.average(<field>[, <fieldName>])
-Swivel.Grouping.median(<field>[, <fieldName>])
-Swivel.Grouping.stdDev(<field>[, <fieldName>])
+    swivel.sum(<field>[, <alias>])
+    swivel.average(<field>[, <alias>])
+    swivel.median(<field>[, <alias>])
+    swivel.stdDev(<field>[, <alias>])
 
-<field>
-the field in the dataset that you want to aggregate over
+    <field>
+      the field in the dataset that you want to aggregate over
 
-<fieldName>
-The name of the field in the flattened row, defaults to <field>
+    <alias>
+      The name of the field in the swivelled result, defaults to <field>
 */
 
 function swivel(rows) {
-  var _swivel = {
+  var swizzle = {
     rows: rows,
     groupBy: groupBy
   };
 
   function groupBy() {
     var fields = swivel.util.argArray(arguments);
-    // return swivel.grouping(this, fields)
-    return (swivel.groupBy(_swivel, fields)).groupAll();
+    return swivel.groupBy(this, fields).groupAll();
   }
 
-  return _swivel;
+  return swizzle;
 };
+
+swivel.traveler = function(groupby, map) {
+  var _traveler = {
+    visitAll: visitAll
+  };
+
+  function visitAll() {
+    // go through each map
+  };
+
+  function visitRow() {
+
+  }
+
+  function visitColumn() {
+
+  }
+
+  // function pivotLeft(pivotField, callback) {
+  //   if(typeof callback === 'undefined') {
+  //     callback = swivel.count();
+  //   }
+  //
+  //   var flattened = [];
+  //   var groups    = _groups;
+  //
+  //   // Bisect fields by the pivotField
+  //   var fieldIdx    = fields.indexOf(pivotField);
+  //   var leftFields  = fields.slice(0, fieldIdx);
+  //   var rightFields = fields.slice(fieldIdx);
+  //
+  //   var self = this;
+  //   var pivotKeys = Object.keys(_values[pivotField]);
+  //   eachGroup({}, groups, leftFields, 0, function(groups, group) {
+  //     var pivotRow = {};
+  //
+  //     for(var k = 0; k < pivotKeys.length; k++) {
+  //       var groupNode = groups[pivotKeys[k]];
+  //
+  //       if(typeof groupNode === 'undefined') {
+  //         pivotRow[pivotKeys[k]] = null;
+  //       } else {
+  //         //var rowIdxs   = self.collectIndexes(groupNode, rightFields, 0);
+  //         var rowIdxs   = [];
+  //         var values    = callback(fetchRows(rowIdxs), group);
+  //         var valueKeys = Object.keys(values);
+  //
+  //         if(valueKeys.length == 1) {
+  //           var firstKey = valueKeys[0];
+  //           pivotRow[pivotKeys[k]] = values[firstKey];
+  //         } else {
+  //           pivotRow[pivotKeys[k]] = values
+  //         }
+  //       }
+  //     }
+  //
+  //     var row = {};
+  //     $.extend(row, group, pivotRow);
+  //     flattened.push(row);
+  //   });
+  //
+  //   return flattened;
+  // };
+  //
+  // function eachGroup(group, groups, fields, fieldIdx, callback) {
+  //   if(fieldIdx == fields.length) {
+  //     return callback(groups, group);
+  //   }
+  //
+  //   var field  = fields[fieldIdx];
+  //   var counts = _values[field];
+  //   var values = Object.keys(counts).sort();
+  //
+  //   // add to group and recurse
+  //   for(var v = 0; v < values.length; v++) {
+  //     var value = values[v];
+  //     var groupValue = groups[value];
+  //
+  //     if(typeof groupValue !== "undefined") {
+  //       group[field] = value;
+  //       eachGroup(group, groupValue, fields, fieldIdx + 1, callback);
+  //       delete group[field];
+  //     }
+  //   }
+  // };
+  //
+  // function fetchRows(rowIndexes) {
+  //   var rows = [];
+  //   for(var i = 0; i < rowIndexes.length; i++) {
+  //     var idx = rowIndexes[i];
+  //     rows.push(parent.rows[idx]);
+  //   }
+  //   return rows;
+  // };
+
+  // DO THE TRAVELING
+
+  return _traveler;
+};
+
+swivel.tree = function(fields) {
+  var root   = {};
+  var values = {};
+
+  var _tree = {
+    select: select,
+    insert: insertAll
+  };
+
+  // Public
+
+  function select() {
+    var map = swivel.map(this, fields)
+    return map.select.apply(map, arguments);
+  };
+
+  // add in where, pivotBy, etc.
+
+  function insertAll(rows) {
+    for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+      insert(root, rows[rowIdx], rowIdx, fields, 0);
+    }
+
+    return this;
+  }
+
+  // Private
+
+  function insert(node, row, rowIdx, fields, fieldIdx) {
+    var field      = fields[fieldIdx];
+    var value      = row[fields[fieldIdx]];
+    var isLeafNode = (fieldIdx + 1 == fields.length);
+
+    // Insert Field
+
+    if(!(field in values)) {
+      values[field] = {};
+    }
+
+    // Update Field Count
+
+    if(!(value in values[field])) {
+      values[field][value] = 1;
+    } else {
+      values[field][value] += 1;
+    }
+
+    // Insert Group
+
+    if(!(value in node)) {
+      if(isLeafNode) {
+        node[value] = [];
+      } else {
+        node[value] = {};
+      }
+    }
+
+    // Terminate: Insert Row Index
+    // Continue:  Recurse Into Field List
+
+    if(isLeafNode) {
+      node[value].push(rowIdx);
+    } else {
+      insert(node[value], row, rowIdx, fields, fieldIdx + 1);
+    }
+  };
+
+  return _tree;
+}
 
 swivel.util = {};
 swivel.util.argArray = function(args) {

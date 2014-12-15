@@ -1,7 +1,6 @@
-swivel.map = function(fields) {
+swivel.map = function(parent, fields) {
   var values   = [];
   var fieldMap = {};
-  var fields   = fields;
 
   var _map = {
     select: select,
@@ -9,8 +8,6 @@ swivel.map = function(fields) {
     where: where,
     all: all
   };
-
-  console.log(fields);
 
   for(var i = 0; i < fields.length; i++) {
     fieldMap[fields[i]] = { orientation: 'r', filters: [] }
@@ -26,7 +23,8 @@ swivel.map = function(fields) {
 
   function select() {
     values = values.concat(swivel.util.argArray(arguments));
-    return _map;
+
+    return this;
   };
 
   function pivotBy() {
@@ -42,17 +40,17 @@ swivel.map = function(fields) {
       getField(pivotFields[i]).orientation = 'c';
     }
 
-    return _map;
+    return this;
   };
 
   function where(fieldName, filter) {
     getField(fieldName).filters.push(filter);
-    return _map;
+
+    return this;
   };
 
   function all() {
-    // parent.groupAll().traverse()
-    // DO THE DAMN THANG
+    return swivel.traveler(parent.groupAll(), this).visitAll();
   };
 
   return _map;

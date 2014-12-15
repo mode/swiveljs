@@ -17,13 +17,13 @@
         }
       };
 
-      dataset = d3.csv("datasets/chart_colors.csv", chartColorsAccessor, function(dataset) {
-        var wivel = swivel(dataset);
-        var byColors = wivel.groupBy('colors', 'chart_type')
-        var pivotByChartType = byColors.pivotLeft('chart_type', swivel.sum('all_charts'));
-
-        console.log(pivotByChartType);
-      });
+      // dataset = d3.csv("datasets/chart_colors.csv", chartColorsAccessor, function(dataset) {
+      //   var wivel = swivel(dataset);
+      //   var byColors = wivel.groupBy('colors', 'chart_type')
+      //   var pivotByChartType = byColors.pivotLeft('chart_type', swivel.sum('all_charts'));
+      //
+      //   console.log(pivotByChartType);
+      // });
 
       d3.json('datasets/nfl_large.json', function(dataset) {
         console.log(dataset);
@@ -35,18 +35,19 @@
           .select(swivel.average('yards'))
           .pivotBy('season')
           .where('season', function(season) { return season > 1980; })
+          .all();
 
           console.log(map);
 
         // Row
-        var byTeam = pivot.groupBy('team');
-        var pivotByTeam = byTeam.pivotLeft('team', swivel.sum('yards'));
-
-        console.log("pivotByTeam", pivotByTeam);
+        // var byTeam = pivot.groupBy('team');
+        // var pivotByTeam = byTeam.pivotLeft('team', swivel.sum('yards'));
+        //
+        // console.log("pivotByTeam", pivotByTeam);
 
         // Row + Column
-        var byTeamSeason = pivot.groupBy('team', 'season');
-        var pivotByTeamSeason = byTeamSeason.pivotLeft('season', swivel.count('yards'));
+        // var byTeamSeason = pivot.groupBy('team', 'season');
+        // var pivotByTeamSeason = byTeamSeason.pivotLeft('season', swivel.count('yards'));
 
         // p without argument pivots the last field
         // swivel.g('team', 'season').c().v(Swivel.Grouping.sum('yards'))
@@ -59,7 +60,7 @@
         // for columns we'll loop over and extend the row, for rows we'll loop over
         // and add rows to the set and whichever field we're on we'll do the right thing
 
-        console.log("pivotByTeamSeason", pivotByTeamSeason);
+        // console.log("pivotByTeamSeason", pivotByTeamSeason);
       });
     </script>
   </body>
