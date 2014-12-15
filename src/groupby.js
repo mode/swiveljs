@@ -1,6 +1,12 @@
-swivel.groupBy = function(_parent, fields) {
+swivel.groupBy = function(parent, fields) {
   var _groups = {};
   var _values = {};
+
+  var _groupBy = {
+    select: select,
+    groupAll: groupAll,
+    pivotLeft: pivotLeft,
+  };
 
   function select() {
     var map = swivel.map(fields)
@@ -9,7 +15,7 @@ swivel.groupBy = function(_parent, fields) {
 
   function groupAll() {
     var groups = _groups;
-    var rows   = _parent.rows;
+    var rows   = parent.rows;
 
     for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
       insertRow(groups, rows[rowIdx], rowIdx, fields, 0);
@@ -129,14 +135,10 @@ swivel.groupBy = function(_parent, fields) {
     var rows = [];
     for(var i = 0; i < rowIndexes.length; i++) {
       var idx = rowIndexes[i];
-      rows.push(_parent.rows[idx]);
+      rows.push(parent.rows[idx]);
     }
     return rows;
   };
 
-  return {
-    select: select,
-    groupAll: groupAll,
-    pivotLeft: pivotLeft,
-  };
+  return _groupBy;
 };
