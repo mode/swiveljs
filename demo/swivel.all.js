@@ -27,7 +27,6 @@ swivel.map = function(fields) {
     hasColumns: hasColumns,
 
     getField: getField,
-    getSelects: getSelects,
     getFieldNames: getFieldNames,
     getRowFieldNames: getRowFieldNames,
     getColumnFieldNames: getColumnFieldNames,
@@ -104,10 +103,6 @@ swivel.map = function(fields) {
   }
 
   // Basic Accessors
-
-  function getSelects() {
-    return selects;
-  }
 
   function getField(fieldName) {
     return fieldMap[fieldName];
