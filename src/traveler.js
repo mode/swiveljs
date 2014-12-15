@@ -67,6 +67,7 @@ swivel.traveler = function(tree, map) {
       }
     }
 
+    var nextField = map.getFieldByIndex(nextFieldIdx);
     tree.eachGroup({}, node, currFields, 0, function(node, branch) {
       var row = {};
       $.extend(row, branch);
@@ -74,7 +75,7 @@ swivel.traveler = function(tree, map) {
       // no more fields available
       if(nextFieldIdx == fieldNames.length) {
         console.log("Aggregating rows", node);
-      } else if(map.getFieldByIndex(nextFieldIdx).isColumn()) {
+      } else if(nextField.isColumn()) {
         $.extend(row, visitColumn(node, nextFieldIdx));
       }
       // if next field is a column
@@ -85,11 +86,36 @@ swivel.traveler = function(tree, map) {
     });
 
     return rows;
-  }
+  };
 
   function visitColumn(node, fieldIdx) {
-    console.log("visiting column ", fieldIdx);
-  }
+    var row = {};
+
+    var nextFieldIdx = fieldIdx + 1;
+    var fieldNames   = map.getFieldNames();
+    var nextField    = map.getFieldByIndex(nextFieldIdx);
+
+    tree.eachValue(node, fieldIdx, function(node, value) {
+      var colValue = {};
+
+      if(typeof(node) === 'undefined') {
+        colValue[value] = null;
+      } else if(nextFieldIdx == fieldNames.length) {
+        colValue[value] = 0;
+        console.log("aggregating", value, node);
+      } else if(nextField.isRow()) {
+        colValue[value] = visitRow(node, nextFieldIdx);
+      } else if(nextField.isColumn()) {
+        colValue[value] = visitColumn(node, nextFieldIdx);
+      }
+
+      $.extend(row, colValue);
+    });
+
+    console.log(row);
+
+    return row;
+  };
 
   // fields needs to be only the fields we want to recurse on
 

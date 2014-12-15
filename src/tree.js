@@ -3,9 +3,10 @@ swivel.tree = function(fields) {
   var values = {};
 
   var _tree = {
-    getRoot: getRoot,
     insert: insert,
-    eachGroup: eachGroup,
+    getRoot: getRoot,
+    eachValue: eachValue,
+    eachGroup: eachGroup
   };
 
   // Public
@@ -19,6 +20,19 @@ swivel.tree = function(fields) {
     }
 
     return this;
+  };
+
+  function eachValue(node, fieldIdx, callback) {
+    var field     = fields[fieldIdx];
+    var counts    = values[field];
+    var valueKeys = Object.keys(counts);
+
+    for(var v = 0; v < valueKeys.length; v++) {
+      var valueKey = valueKeys[v];
+      var childNode = node[valueKey];
+
+      callback(childNode, valueKey);
+    }
   };
 
   function eachGroup(branch, node, fields, fieldIdx, callback) {
