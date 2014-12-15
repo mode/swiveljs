@@ -14,12 +14,8 @@ swivel.tree = function(fields) {
     return root;
   };
 
-  function insert(rows) {
-    for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-      insertOne(root, rows[rowIdx], rowIdx, fields, 0);
-    }
-
-    return this;
+  function insert(row, rowIdx) {
+    insertOne(root, row, rowIdx, fields, 0);
   };
 
   function eachValue(node, fieldIdx, callback) {

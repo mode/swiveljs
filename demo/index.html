@@ -17,13 +17,16 @@
         }
       };
 
-      // dataset = d3.csv("datasets/chart_colors.csv", chartColorsAccessor, function(dataset) {
-      //   var wivel = swivel(dataset);
-      //   var byColors = wivel.groupBy('colors', 'chart_type')
-      //   var pivotByChartType = byColors.pivotLeft('chart_type', swivel.sum('all_charts'));
-      //
-      //   console.log(pivotByChartType);
-      // });
+      dataset = d3.csv("datasets/chart_colors.csv", chartColorsAccessor, function(dataset) {
+        var pivot = swivel
+          .data(dataset)
+          .fields('colors', 'chart_type')
+          .pivots('chart_type')
+          .select(swivel.sum('all_charts'))
+          .all()
+
+        console.log(pivot);
+      });
 
       d3.json('datasets/nfl_large.json', function(dataset) {
         console.log(dataset);
@@ -31,34 +34,13 @@
         var pivot = swivel
           .data(dataset.content)
           .fields('team', 'season')
+          .pivots('season')
           .select(swivel.sum('yards'), 'SUM(yards)')
           .select(swivel.average('yards'), 'AVG(yards)')
+          .where(function(row) { return row['season'] > 1980; })
           .all();
 
         console.log(pivot);
-
-        // Row
-        // var byTeam = pivot.groupBy('team');
-        // var pivotByTeam = byTeam.pivotLeft('team', swivel.sum('yards'));
-        //
-        // console.log("pivotByTeam", pivotByTeam);
-
-        // Row + Column
-        // var byTeamSeason = pivot.groupBy('team', 'season');
-        // var pivotByTeamSeason = byTeamSeason.pivotLeft('season', swivel.count('yards'));
-
-        // p without argument pivots the last field
-        // swivel.g('team', 'season').c().v(Swivel.Grouping.sum('yards'))
-        // swivel.g('team', 'season').r('team').c('season').v(...)
-        // swivel.g('team', 'season')
-
-        // Instead
-
-        // internally we'll build a full traversal map and then run through it
-        // for columns we'll loop over and extend the row, for rows we'll loop over
-        // and add rows to the set and whichever field we're on we'll do the right thing
-
-        // console.log("pivotByTeamSeason", pivotByTeamSeason);
       });
     </script>
   </body>

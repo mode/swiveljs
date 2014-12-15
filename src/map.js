@@ -4,8 +4,7 @@ swivel.map = function(fields) {
 
   var _map = {
     select: select,
-    pivot: pivot,
-    where: where,
+    pivots: pivots,
 
     hasRows: hasRows,
     hasColumns: hasColumns,
@@ -20,7 +19,7 @@ swivel.map = function(fields) {
 
   for(var i = 0; i < fields.length; i++) {
     fieldMap[fields[i]] = {
-      orientation: 'r', filters: [],
+      orientation: 'r',
       isRow: function() { return this.orientation == 'r'; },
       isColumn: function() { return this.orientation == 'c'; }
     }
@@ -33,8 +32,9 @@ swivel.map = function(fields) {
     return this;
   };
 
-  function pivot() {
-    var pivotFields = [].concat(swivel.args(arguments));
+  function pivots() {
+    var args = swivel.args(arguments);
+    var pivotFields = [].concat(args);
 
     // Reset Orientation
     for(var i = 0; i < fields.length; i++) {

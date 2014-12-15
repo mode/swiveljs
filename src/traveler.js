@@ -2,24 +2,19 @@
 // this won't work because data and tree can be instantiated at different times
 //
 swivel.traveler = function(tree, map) {
-  var _data = [];
+  var rows = [];
+  var wheres = [];
 
   // Return Object
   var _traveler = {
-    data: data,
     select: select,
-    pivot: pivot,
+    pivots: pivots,
+    data: data,
     where: where,
     all: all,
   };
 
   // Public
-
-  function data(rows) {
-    _data = _data.concat(rows);
-
-    return this;
-  };
 
   function select() {
     map.select.apply(map, arguments);
@@ -27,20 +22,27 @@ swivel.traveler = function(tree, map) {
     return this;
   };
 
-  function pivot() {
-    map.pivot.apply(map, arguments);
+  function pivots() {
+    map.pivots.apply(map, arguments);
 
     return this;
   };
 
-  function where() {
-    map.where.apply(map, arguments);
+
+  function data(newRows) {
+    rows = rows.concat(newRows);
+
+    return this;
+  };
+
+  function where(whereFn) {
+    wheres.push(whereFn);
 
     return this;
   };
 
   function all() {
-    tree.insert(_data);
+    insertAll();
 
     if(map.hasRows()) {
       return visitRows(tree.getRoot(), 0);
@@ -50,6 +52,24 @@ swivel.traveler = function(tree, map) {
   }
 
   // Private
+
+  function insertAll() {
+    for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+      var row = rows[rowIdx];
+
+      var included = true;
+      for(var i = 0; i < wheres.length; i++) {
+        if(wheres[i](row) == false) {
+          included = false;
+          break;
+        }
+      }
+
+      if(included) {
+        tree.insert(row, rowIdx);
+      }
+    }
+  }
 
   function visitRows(node, fieldIdx) {
     var rows = [];
@@ -121,9 +141,9 @@ swivel.traveler = function(tree, map) {
   };
 
   function aggregateValues(node) {
-    var rows = [];
+    var nodeRows = [];
     for(var i = 0; i < node.length; i++) {
-      rows.push(_data[node[i]]);
+      nodeRows.push(rows[node[i]]);
     }
 
     var values     = {};
@@ -134,7 +154,7 @@ swivel.traveler = function(tree, map) {
       var alias = aliases[i];
       var aggFn = selections[alias];
 
-      values[alias] = aggFn(rows);
+      values[alias] = aggFn(nodeRows);
     }
 
     return values;
