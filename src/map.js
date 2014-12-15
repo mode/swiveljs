@@ -1,5 +1,5 @@
 swivel.map = function(fields) {
-  var values   = [];
+  var values   = {};
   var fieldMap = {};
 
   var _map = {
@@ -9,7 +9,9 @@ swivel.map = function(fields) {
 
     hasRows: hasRows,
     hasColumns: hasColumns,
+
     getField: getField,
+    getValues: getValues,
     getFieldNames: getFieldNames,
     getRowFieldNames: getRowFieldNames,
     getColumnFieldNames: getColumnFieldNames,
@@ -26,9 +28,8 @@ swivel.map = function(fields) {
 
   // Public
 
-  function select() {
-    values = values.concat(swivel.util.argArray(arguments));
-
+  function select(aggregate, alias) {
+    values[alias] = aggregate;
     return this;
   };
 
@@ -88,6 +89,12 @@ swivel.map = function(fields) {
       }
     }
     return fieldNames;
+  }
+
+  // Basic Accessors
+
+  function getValues() {
+    return values;
   }
 
   function getField(fieldName) {

@@ -18,7 +18,7 @@ swivel.data = function(data) {
 }
 
 swivel.map = function(fields) {
-  var values   = [];
+  var values   = {};
   var fieldMap = {};
 
   var _map = {
@@ -28,7 +28,9 @@ swivel.map = function(fields) {
 
     hasRows: hasRows,
     hasColumns: hasColumns,
+
     getField: getField,
+    getValues: getValues,
     getFieldNames: getFieldNames,
     getRowFieldNames: getRowFieldNames,
     getColumnFieldNames: getColumnFieldNames,
@@ -45,9 +47,8 @@ swivel.map = function(fields) {
 
   // Public
 
-  function select() {
-    values = values.concat(swivel.util.argArray(arguments));
-
+  function select(aggregate, alias) {
+    values[alias] = aggregate;
     return this;
   };
 
@@ -107,6 +108,12 @@ swivel.map = function(fields) {
       }
     }
     return fieldNames;
+  }
+
+  // Basic Accessors
+
+  function getValues() {
+    return values;
   }
 
   function getField(fieldName) {
@@ -219,13 +226,10 @@ swivel.traveler = function(tree, map) {
 
       // no more fields available
       if(nextFieldIdx == fieldNames.length) {
-        console.log("Aggregating rows", node);
+        $.extend(row, visitValues(node));
       } else if(nextField.isColumn()) {
         $.extend(row, visitColumn(node, nextFieldIdx));
       }
-      // if next field is a column
-      // if there is no next field
-      console.log(branch);
 
       rows.push(row);
     });
@@ -243,11 +247,10 @@ swivel.traveler = function(tree, map) {
     tree.eachValue(node, fieldIdx, function(node, value) {
       var colValue = {};
 
-      if(typeof(node) === 'undefined') {
+      if(typeof(node) === 'undefined') { // No branch at this value
         colValue[value] = null;
-      } else if(nextFieldIdx == fieldNames.length) {
-        colValue[value] = 0;
-        console.log("aggregating", value, node);
+      } else if(nextFieldIdx == fieldNames.length) { // No more fields
+        colValue[value] = visitValues(node);
       } else if(nextField.isRow()) {
         colValue[value] = visitRow(node, nextFieldIdx);
       } else if(nextField.isColumn()) {
@@ -257,10 +260,28 @@ swivel.traveler = function(tree, map) {
       $.extend(row, colValue);
     });
 
-    console.log(row);
-
     return row;
   };
+
+  function visitValues(node) {
+    var rows = [];
+    for(var i = 0; i < node.length; i++) {
+      rows.push(_data[node[i]]);
+    }
+
+    var values = {};
+    var selections = map.getValues();
+    var aliases    = Object.keys(selections);
+
+    for(var i = 0; i < aliases.length; i++) {
+      var alias = aliases[i];
+      var aggregate = selections[alias];
+
+      values[alias] = aggregate(rows);
+    }
+
+    return values;
+  }
 
   // fields needs to be only the fields we want to recurse on
 

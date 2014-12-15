@@ -32,7 +32,7 @@
           .data(dataset.content)
           .fields('team', 'season')
           .pivot('season')
-          .select(swivel.sum('yards'))
+          .select(swivel.sum('yards'), 'SUM(yards)')
           .all();
 
           console.log(pivot);
