@@ -3,6 +3,13 @@ swivel.map = function(fields) {
   var fieldMap = {};
   var fields   = fields;
 
+  var _map = {
+    select: select,
+    pivotBy: pivotBy,
+    where: where,
+    all: all
+  };
+
   console.log(fields);
 
   for(var i = 0; i < fields.length; i++) {
@@ -19,7 +26,7 @@ swivel.map = function(fields) {
 
   function select() {
     values = values.concat(swivel.util.argArray(arguments));
-    return this;
+    return _map;
   };
 
   function pivotBy() {
@@ -35,22 +42,18 @@ swivel.map = function(fields) {
       getField(pivotFields[i]).orientation = 'c';
     }
 
-    return this;
+    return _map;
   };
 
   function where(fieldName, filter) {
     getField(fieldName).filters.push(filter);
-    return this;
+    return _map;
   };
 
   function all() {
+    // parent.groupAll().traverse()
     // DO THE DAMN THANG
   };
 
-  return {
-    select: select,
-    pivotBy: pivotBy,
-    where: where,
-    all: all
-  };
+  return _map;
 };
