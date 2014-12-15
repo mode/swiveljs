@@ -31,8 +31,8 @@
 datasets.nfl(function(dataset) {
   var pivot = swivel
     .data(dataset.content)
-    .fields('team', 'season')
-    .pivots('season')
+    .fields('season', 'team')
+    .pivots('team')
     .select(swivel.sum('yards'), 'Total Yards')
     .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
     .all();
@@ -53,27 +53,28 @@ datasets.nfl(function(dataset) {
 
     // Getting Data Together
 
-    var data       = [];
-    var seriesName = 'team';
-    var axisValues = pivot.values('season');
+    var data        = [];
+    var axisName    = 'season';
+    var seriesNames = pivot.values('team');
 
+    // Initialize Series
+    for(var s = 0; s < seriesNames.length; s++) {
+      data.push({ key: seriesNames[s], values: [] });
+    }
+
+    // Populate Series
     for(var p = 0; p < pivot.data.length; p++) {
-      var values = [];
-      var row    = pivot.data[p];
+      var row = pivot.data[p];
 
-      for(var v = 0; v < axisValues.length; v++) {
-        var axisValue = axisValues[v];
-
-        values.push({
-          x: axisValue,
-          y: row[axisValue],
-          label: row[seriesName]
+      for(var s = 0; s < seriesNames.length; s++) {
+        data[s].values.push({
+          x: row[axisName],
+          y: row[seriesNames[s]],
+          label: row[axisName]
         });
       }
-
-      data.push({ key: row[seriesName], values: values })
     }
-    
+
     // End Getting Data Together
 
     d3.select('#chart svg').datum(data).call(chart);
@@ -87,8 +88,8 @@ datasets.nfl(function(dataset) {
       datasets.nfl(function(dataset) {
         var pivot = swivel
           .data(dataset.content)
-          .fields('team', 'season')
-          .pivots('season')
+          .fields('season', 'team')
+          .pivots('team')
           .select(swivel.sum('yards'), 'Total Yards')
           .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
           .all();
@@ -109,25 +110,26 @@ datasets.nfl(function(dataset) {
 
           // Getting Data Together
 
-          var data       = [];
-          var seriesName = 'team';
-          var axisValues = pivot.values('season');
+          var data        = [];
+          var axisName    = 'season';
+          var seriesNames = pivot.values('team');
 
+          // Initialize Series
+          for(var s = 0; s < seriesNames.length; s++) {
+            data.push({ key: seriesNames[s], values: [] });
+          }
+
+          // Populate Series
           for(var p = 0; p < pivot.data.length; p++) {
-            var values = [];
-            var row    = pivot.data[p];
+            var row = pivot.data[p];
 
-            for(var v = 0; v < axisValues.length; v++) {
-              var axisValue = axisValues[v];
-
-              values.push({
-                x: axisValue,
-                y: row[axisValue],
-                label: row[seriesName]
+            for(var s = 0; s < seriesNames.length; s++) {
+              data[s].values.push({
+                x: row[axisName],
+                y: row[seriesNames[s]],
+                label: row[axisName]
               });
             }
-
-            data.push({ key: row[seriesName], values: values })
           }
 
           // End Getting Data Together
