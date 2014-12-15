@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
   },
+
   "main": "swivel.js",
   "homepage": "https://github.com/mode/swiveljs",
   "authors": [

@@ -1,0 +1,152 @@
+<html>
+  <head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.js"></script>
+    <link rel="styleshet" href="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css" />
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.css" />
+
+    <script src="swivel.all.js"></script>
+
+    <script src="index.js"></script>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+
+  <body>
+    <h1>Line Chart Example</h1>
+
+    <p>Total yards by season for each team in the NFL during the 2000 to 2013 seasons.</p>
+
+    <div id="chart">
+      <svg style="height:500px; width:95%;"></svg>
+    </div>
+
+    <h2>Sample Code</h2>
+
+<pre class="prettyprint">
+datasets.nfl(function(dataset) {
+  var pivot = swivel
+    .data(dataset.content)
+    .fields('team', 'season')
+    .pivots('season')
+    .select(swivel.sum('yards'), 'Total Yards')
+    .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
+    .all();
+
+  nv.addGraph(function() {
+    var chart = nv.models.lineChart()
+      .margin({left: 100})
+      .showLegend(true)
+      .showYAxis(true)
+      .showXAxis(true);
+
+    chart.xAxis
+      .axisLabel('Season');
+
+    chart.yAxis
+      .axisLabel('Total Yards')
+      .tickFormat(d3.format('.0f'));
+
+    // Getting Data Together
+
+    var data   = [];
+    var xname  = 'team';
+    var ynames = pivot.values('season');
+
+    for(var p = 0; p < pivot.data.length; p++) {
+      var row = pivot.data[p];
+
+      var values = [];
+
+      for(var y = 0; y < ynames.length; y++) {
+        var yname = ynames[y];
+        var yvalue = row[yname];
+
+        if(yvalue != null) {
+          values.push({
+            x: +ynames[y],
+            y: row[ynames[y]],
+            label: ''
+          });
+        }
+      }
+
+      data.push({ key: row[xname], values: values })
+    }
+
+    // End Getting Data Together
+
+    d3.select('#chart svg').datum(data).call(chart);
+
+    return chart;
+  });
+});
+</pre>
+
+    <script type="text/javascript">
+      datasets.nfl(function(dataset) {
+        var pivot = swivel
+          .data(dataset.content)
+          .fields('team', 'season')
+          .pivots('season')
+          .select(swivel.sum('yards'), 'Total Yards')
+          .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
+          .all();
+
+        nv.addGraph(function() {
+          var chart = nv.models.lineChart()
+            .margin({left: 100})
+            .showLegend(true)
+            .showYAxis(true)
+            .showXAxis(true);
+
+          chart.xAxis
+            .axisLabel('Season');
+
+          chart.yAxis
+            .axisLabel('Total Yards')
+            .tickFormat(d3.format('.0f'));
+
+          // Getting Data Together
+
+          var data   = [];
+          var xname  = 'team';
+          var ynames = pivot.values('season');
+
+          for(var p = 0; p < pivot.data.length; p++) {
+            var row = pivot.data[p];
+
+            var values = [];
+
+            for(var y = 0; y < ynames.length; y++) {
+              var yname = ynames[y];
+              var yvalue = row[yname];
+
+              if(yvalue != null) {
+                values.push({
+                  x: +ynames[y],
+                  y: row[ynames[y]],
+                  label: ''
+                });
+              }
+            }
+
+            data.push({ key: row[xname], values: values })
+          }
+
+          // End Getting Data Together
+
+          d3.select('#chart svg').datum(data).call(chart);
+
+          return chart;
+        });
+      });
+
+      (function(){ prettyPrint(); })();
+    </script>
+  </body>
+</html>
