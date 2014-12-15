@@ -3,30 +3,22 @@ swivel.tree = function(fields) {
   var values = {};
 
   var _tree = {
-    select: select,
-    insert: insertAll
+    insert: insert
   };
 
   // Public
 
-  function select() {
-    var map = swivel.map(this, fields)
-    return map.select.apply(map, arguments);
-  };
-
-  // add in where, pivotBy, etc.
-
-  function insertAll(rows) {
+  function insert(rows) {
     for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-      insert(root, rows[rowIdx], rowIdx, fields, 0);
+      insertOne(root, rows[rowIdx], rowIdx, fields, 0);
     }
 
     return this;
-  }
+  };
 
   // Private
 
-  function insert(node, row, rowIdx, fields, fieldIdx) {
+  function insertOne(node, row, rowIdx, fields, fieldIdx) {
     var field      = fields[fieldIdx];
     var value      = row[fields[fieldIdx]];
     var isLeafNode = (fieldIdx + 1 == fields.length);

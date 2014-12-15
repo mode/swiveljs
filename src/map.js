@@ -1,25 +1,18 @@
-swivel.map = function(parent, fields) {
+swivel.map = function(fields) {
   var values   = [];
   var fieldMap = {};
 
   var _map = {
     select: select,
-    pivotBy: pivotBy,
-    where: where,
-    all: all
+    pivot: pivot,
+    where: where
   };
 
   for(var i = 0; i < fields.length; i++) {
     fieldMap[fields[i]] = { orientation: 'r', filters: [] }
   }
 
-  function getField(fieldName) {
-    return fieldMap[fieldName];
-  };
-
-  function getFieldByIndex(fieldIndex) {
-    return fieldMap[fields[fieldIndex]];
-  };
+  // Public
 
   function select() {
     values = values.concat(swivel.util.argArray(arguments));
@@ -27,7 +20,7 @@ swivel.map = function(parent, fields) {
     return this;
   };
 
-  function pivotBy() {
+  function pivot() {
     var pivotFields = [].concat(swivel.util.argArray(arguments));
 
     // Reset Orientation
@@ -49,8 +42,14 @@ swivel.map = function(parent, fields) {
     return this;
   };
 
-  function all() {
-    return swivel.traveler(parent.groupAll(), this).visitAll();
+  // Private
+
+  function getField(fieldName) {
+    return fieldMap[fieldName];
+  };
+
+  function getFieldByIndex(fieldIndex) {
+    return fieldMap[fields[fieldIndex]];
   };
 
   return _map;

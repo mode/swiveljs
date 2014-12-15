@@ -1,11 +1,52 @@
-swivel.traveler = function(groupby, map) {
+//
+// this won't work because data and tree can be instantiated at different times
+//
+swivel.traveler = function(tree, map) {
+  // Map
+  var _data     = [];
+
+  // Return Object
   var _traveler = {
-    visitAll: visitAll
+    data: data,
+    select: select,
+    pivot: pivot,
+    where: where,
+    all: all,
   };
 
-  function visitAll() {
-    // go through each map
+  // Public
+
+  function data(rows) {
+    _data = _data.concat(rows);
+
+    return this;
   };
+
+  function select() {
+    map.select.apply(map, arguments);
+
+    return this;
+  };
+
+  function pivot() {
+    map.pivot.apply(map, arguments);
+
+    return this;
+  };
+
+  function where() {
+    map.where.apply(map, arguments);
+
+    return this;
+  };
+
+  function all() {
+    tree.insert(_data);
+
+    // iterate and return the things
+  }
+
+  // Private
 
   function visitRow() {
 

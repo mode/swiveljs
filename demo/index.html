@@ -28,12 +28,12 @@
       d3.json('datasets/nfl_large.json', function(dataset) {
         console.log(dataset);
 
-        var pivot = swivel(dataset.content);
+        var swizzle = swivel(dataset.content);
 
-        var map = pivot.groupBy('team', 'season')
+        var map = swizzle.group('team', 'season')
           .select(swivel.count('yards'))
           .select(swivel.average('yards'))
-          .pivotBy('season')
+          .pivot('season')
           .where('season', function(season) { return season > 1980; })
           .all();
 

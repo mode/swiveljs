@@ -51,16 +51,22 @@
       The name of the field in the swivelled result, defaults to <field>
 */
 
+// swivel.data = function(rows) {
+//   // this is the traveler then?.. Then traveler should just have data
+// }
+
 function swivel(rows) {
   var swizzle = {
-    rows: rows,
-    groupBy: groupBy
+    group: group
   };
-
-  function groupBy() {
+  
+  function group() {
     var fields = swivel.util.argArray(arguments);
-    return swivel.groupBy(this, fields).groupAll();
-  }
+
+    var map  = swivel.map(fields);
+    var tree = swivel.tree(fields);
+    return swivel.traveler(tree, map).data(rows);
+  };
 
   return swizzle;
 };

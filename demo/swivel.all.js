@@ -1,37 +1,18 @@
-swivel.groupBy = function(parent, fields) {
-  var _groupBy = {
-    groupAll: groupAll
-  };
-
-  function groupAll() {
-    return swivel.tree(fields).insert(parent.rows);
-  };
-
-  return _groupBy;
-};
-
-swivel.map = function(parent, fields) {
+swivel.map = function(fields) {
   var values   = [];
   var fieldMap = {};
 
   var _map = {
     select: select,
-    pivotBy: pivotBy,
-    where: where,
-    all: all
+    pivot: pivot,
+    where: where
   };
 
   for(var i = 0; i < fields.length; i++) {
     fieldMap[fields[i]] = { orientation: 'r', filters: [] }
   }
 
-  function getField(fieldName) {
-    return fieldMap[fieldName];
-  };
-
-  function getFieldByIndex(fieldIndex) {
-    return fieldMap[fields[fieldIndex]];
-  };
+  // Public
 
   function select() {
     values = values.concat(swivel.util.argArray(arguments));
@@ -39,7 +20,7 @@ swivel.map = function(parent, fields) {
     return this;
   };
 
-  function pivotBy() {
+  function pivot() {
     var pivotFields = [].concat(swivel.util.argArray(arguments));
 
     // Reset Orientation
@@ -61,8 +42,14 @@ swivel.map = function(parent, fields) {
     return this;
   };
 
-  function all() {
-    return swivel.traveler(parent.groupAll(), this).visitAll();
+  // Private
+
+  function getField(fieldName) {
+    return fieldMap[fieldName];
+  };
+
+  function getFieldByIndex(fieldIndex) {
+    return fieldMap[fields[fieldIndex]];
   };
 
   return _map;
@@ -121,28 +108,75 @@ swivel.map = function(parent, fields) {
       The name of the field in the swivelled result, defaults to <field>
 */
 
+// swivel.data = function(rows) {
+//   // this is the traveler then?.. Then traveler should just have data
+// }
+
 function swivel(rows) {
   var swizzle = {
-    rows: rows,
-    groupBy: groupBy
+    group: group
   };
-
-  function groupBy() {
+  
+  function group() {
     var fields = swivel.util.argArray(arguments);
-    return swivel.groupBy(this, fields).groupAll();
-  }
+
+    var map  = swivel.map(fields);
+    var tree = swivel.tree(fields);
+    return swivel.traveler(tree, map).data(rows);
+  };
 
   return swizzle;
 };
 
-swivel.traveler = function(groupby, map) {
+//
+// this won't work because data and tree can be instantiated at different times
+//
+swivel.traveler = function(tree, map) {
+  // Map
+  var _data     = [];
+
+  // Return Object
   var _traveler = {
-    visitAll: visitAll
+    data: data,
+    select: select,
+    pivot: pivot,
+    where: where,
+    all: all,
   };
 
-  function visitAll() {
-    // go through each map
+  // Public
+
+  function data(rows) {
+    _data = _data.concat(rows);
+
+    return this;
   };
+
+  function select() {
+    map.select.apply(map, arguments);
+
+    return this;
+  };
+
+  function pivot() {
+    map.pivot.apply(map, arguments);
+
+    return this;
+  };
+
+  function where() {
+    map.where.apply(map, arguments);
+
+    return this;
+  };
+
+  function all() {
+    tree.insert(_data);
+
+    // iterate and return the things
+  }
+
+  // Private
 
   function visitRow() {
 
@@ -239,30 +273,22 @@ swivel.tree = function(fields) {
   var values = {};
 
   var _tree = {
-    select: select,
-    insert: insertAll
+    insert: insert
   };
 
   // Public
 
-  function select() {
-    var map = swivel.map(this, fields)
-    return map.select.apply(map, arguments);
-  };
-
-  // add in where, pivotBy, etc.
-
-  function insertAll(rows) {
+  function insert(rows) {
     for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-      insert(root, rows[rowIdx], rowIdx, fields, 0);
+      insertOne(root, rows[rowIdx], rowIdx, fields, 0);
     }
 
     return this;
-  }
+  };
 
   // Private
 
-  function insert(node, row, rowIdx, fields, fieldIdx) {
+  function insertOne(node, row, rowIdx, fields, fieldIdx) {
     var field      = fields[fieldIdx];
     var value      = row[fields[fieldIdx]];
     var isLeafNode = (fieldIdx + 1 == fields.length);
