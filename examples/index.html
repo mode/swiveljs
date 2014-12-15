@@ -1,0 +1,107 @@
+<html>
+  <head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.css" />
+
+    <script src="swivel.all.js"></script>
+  </head>
+
+  <body>
+    <div id="chart">
+      <svg style="height:500px; width:100%;"></svg>
+    </div>
+
+    <script type="text/javascript">
+      var chartColorsAccessor = function(row) {
+        return {
+          'colors': row.colors,
+          'chart_type': row.chart_type,
+          'all_charts': parseInt(row.all_charts)
+        }
+      };
+
+      // dataset = d3.csv("datasets/chart_colors.csv", chartColorsAccessor, function(dataset) {
+      //   var pivot = swivel
+      //     .data(dataset)
+      //     .fields('colors', 'chart_type')
+      //     .pivots('chart_type')
+      //     .select(swivel.sum('all_charts'))
+      //     .all()
+      //
+      //   console.log(pivot);
+      // });
+
+      d3.json('datasets/nfl_large.json', function(dataset) {
+        console.log(dataset);
+
+        var pivot = swivel
+          .data(dataset.content)
+          .fields('team', 'season')
+          .pivots('season')
+          .select(swivel.sum('yards'), 'Total Yards')
+          .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
+          .all();
+
+        console.log(pivot);
+
+        nv.addGraph(function() {
+          var chart = nv.models.lineChart()
+            .margin({left: 100})  //Adjust chart margins to give the x-axis some breathing room.
+            .transitionDuration(350)  //how fast do you want the lines to transition?
+            .showLegend(true)
+            .showYAxis(true)        //Show the y-axis
+            .showXAxis(true)        //Show the x-axis
+            ;
+
+          chart.xAxis     //Chart x-axis settings
+            .axisLabel('Season');
+
+          chart.yAxis     //Chart y-axis settings
+            .axisLabel('Total Yards')
+            .tickFormat(d3.format('.02f'));
+
+          // Getting Data Together
+
+          var data   = [];
+          var xname  = 'team';
+          var ynames = pivot.values('season');
+
+          for(var p = 0; p < pivot.data.length; p++) {
+            var row = pivot.data[p];
+
+            var values = [];
+
+            for(var y = 0; y < ynames.length; y++) {
+              var yname = ynames[y];
+              var yvalue = row[yname];
+
+              if(yvalue != null) {
+                values.push({
+                  x: +ynames[y],
+                  y: row[ynames[y]],
+                  label: ''
+                });
+              }
+            }
+
+            data.push({ key: row[xname], values: values })
+          }
+          // End Getting Data Together
+
+          console.log(data);
+
+          d3.select('#chart svg')    //Select the <svg> element you want to render the chart in.
+            .datum(data)         //Populate the <svg> element with chart data...
+            .call(chart);          //Finally, render the chart!
+
+          //Update the chart when window resizes.
+          // nv.utils.windowResize(function() { chart.update() });
+
+          return chart;
+        });
+      });
+    </script>
+  </body>
+</html>

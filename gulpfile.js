@@ -8,26 +8,26 @@ var rename = require('gulp-rename');
 var filesize = require('gulp-filesize');
 var connect = require('gulp-connect');
 
-var distDir = 'dist';
-var demoDir = 'demo';
+var dist     = 'dist';
+var examples = 'examples';
 
 gulp.task('connect', function() {
   return connect.server({
     port: 9095,
-    root: 'demo'
+    root: examples
   });
 });
 
 gulp.task('build', function() {
   return gulp.src('src/**/*.js')
     .pipe(concat('swivel.all.js'))
-    .pipe(gulp.dest(distDir))
+    .pipe(gulp.dest(dist))
     .pipe(filesize())
-    .pipe(gulp.dest(demoDir));
+    .pipe(gulp.dest(examples));
 });
 
 gulp.task('clean', function () {
-  return gulp.src(distDir, {read: false})
+  return gulp.src(dist, {read: false})
     .pipe(clean());
 });
 
