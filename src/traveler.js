@@ -74,7 +74,7 @@ swivel.traveler = function(tree, map) {
 
       // no more fields available
       if(nextFieldIdx == fieldNames.length) {
-        swivel.merge(row, visitValues(node));
+        swivel.merge(row, aggregateValues(node));
       } else if(nextField.isColumn()) {
         swivel.merge(row, visitColumn(node, nextFieldIdx));
       }
@@ -98,7 +98,7 @@ swivel.traveler = function(tree, map) {
       if(typeof(node) === 'undefined') { // No branch at this value
         colValue[value] = null;
       } else if(nextFieldIdx == fieldNames.length) { // No more fields
-         var values = visitValues(node);
+         var values = aggregateValues(node);
 
         // Lift single values up to the higher level (make optional)
         var valueKeys = Object.keys(values);
@@ -120,7 +120,7 @@ swivel.traveler = function(tree, map) {
     return row;
   };
 
-  function visitValues(node) {
+  function aggregateValues(node) {
     var rows = [];
     for(var i = 0; i < node.length; i++) {
       rows.push(_data[node[i]]);

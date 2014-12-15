@@ -31,7 +31,6 @@
         var pivot = swivel
           .data(dataset.content)
           .fields('team', 'season')
-          .pivot('season')
           .select(swivel.sum('yards'), 'SUM(yards)')
           .select(swivel.average('yards'), 'AVG(yards)')
           .all();
