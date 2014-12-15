@@ -1,3 +1,23 @@
 body {
   font-family: "Helvetica", "Arial";
 }
+
+table {
+  border-collapse: collapse;
+}
+
+table tr td {
+  margin:0;
+  padding:2px 8px 2px 8px;
+  border:1px solid #efefef;
+}
+
+table thead td {
+  font-weight:bold;
+  text-align:center;
+  background-color:#efefef;
+}
+
+table tbody td {
+  text-align:right;
+}

@@ -10,7 +10,7 @@ datasets.nfl = function(callback) {
 datasets.events = function(callback) {
   var eventsMapper = function(row) {
     return {
-      'date_trunc': Date.parse(row['date_trunc']),
+      'day': row['day'],
       'event_name': row['event_name'],
       'location': row['location'],
       'device': row['device'],
