@@ -1,6 +1,6 @@
 <html>
   <head>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
 
@@ -53,31 +53,27 @@ datasets.nfl(function(dataset) {
 
     // Getting Data Together
 
-    var data   = [];
-    var xname  = 'team';
-    var ynames = pivot.values('season');
+    var data       = [];
+    var seriesName = 'team';
+    var axisValues = pivot.values('season');
 
     for(var p = 0; p < pivot.data.length; p++) {
-      var row = pivot.data[p];
-
       var values = [];
+      var row    = pivot.data[p];
 
-      for(var y = 0; y < ynames.length; y++) {
-        var yname = ynames[y];
-        var yvalue = row[yname];
+      for(var v = 0; v < axisValues.length; v++) {
+        var axisValue = axisValues[v];
 
-        if(yvalue != null) {
-          values.push({
-            x: +ynames[y],
-            y: row[ynames[y]],
-            label: ''
-          });
-        }
+        values.push({
+          x: axisValue,
+          y: row[axisValue],
+          label: row[seriesName]
+        });
       }
 
-      data.push({ key: row[xname], values: values })
+      data.push({ key: row[seriesName], values: values })
     }
-
+    
     // End Getting Data Together
 
     d3.select('#chart svg').datum(data).call(chart);
@@ -113,29 +109,25 @@ datasets.nfl(function(dataset) {
 
           // Getting Data Together
 
-          var data   = [];
-          var xname  = 'team';
-          var ynames = pivot.values('season');
+          var data       = [];
+          var seriesName = 'team';
+          var axisValues = pivot.values('season');
 
           for(var p = 0; p < pivot.data.length; p++) {
-            var row = pivot.data[p];
-
             var values = [];
+            var row    = pivot.data[p];
 
-            for(var y = 0; y < ynames.length; y++) {
-              var yname = ynames[y];
-              var yvalue = row[yname];
+            for(var v = 0; v < axisValues.length; v++) {
+              var axisValue = axisValues[v];
 
-              if(yvalue != null) {
-                values.push({
-                  x: +ynames[y],
-                  y: row[ynames[y]],
-                  label: ''
-                });
-              }
+              values.push({
+                x: axisValue,
+                y: row[axisValue],
+                label: row[seriesName]
+              });
             }
 
-            data.push({ key: row[xname], values: values })
+            data.push({ key: row[seriesName], values: values })
           }
 
           // End Getting Data Together
