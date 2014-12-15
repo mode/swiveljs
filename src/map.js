@@ -6,14 +6,22 @@ swivel.map = function(fields) {
     select: select,
     pivot: pivot,
     where: where,
-    
+
+    hasRows: hasRows,
+    hasColumns: hasColumns,
     getField: getField,
     getFieldNames: getFieldNames,
+    getRowFieldNames: getRowFieldNames,
+    getColumnFieldNames: getColumnFieldNames,
     getFieldByIndex: getFieldByIndex
   };
 
   for(var i = 0; i < fields.length; i++) {
-    fieldMap[fields[i]] = { orientation: 'r', filters: [] }
+    fieldMap[fields[i]] = {
+      orientation: 'r', filters: [],
+      isRow: function() { return this.orientation == 'r'; },
+      isColumn: function() { return this.orientation == 'c'; }
+    }
   }
 
   // Public
@@ -48,9 +56,39 @@ swivel.map = function(fields) {
 
   // Accessors
 
+  function hasRows() {
+    return getRowFieldNames().length > 0;
+  };
+
+  function hasColumns() {
+    return getColumnFieldNames().length > 0;
+  };
+
   function getFieldNames() {
     return fields;
   };
+
+  function getRowFieldNames() {
+    var fieldNames = [];
+    for(var i = 0; i < fields.length; i++) {
+      var fieldName = fields[i];
+      if(getField(fieldName).isRow()) {
+        fieldNames.push(fieldName);
+      }
+    }
+    return fieldNames;
+  };
+
+  function getColumnFieldNames() {
+    var fieldNames = [];
+    for(var i = 0; i < fields.length; i++) {
+      var fieldName = fields[i];
+      if(getField(fieldName).isColumn()) {
+        fieldNames.push(fieldName);
+      }
+    }
+    return fieldNames;
+  }
 
   function getField(fieldName) {
     return fieldMap[fieldName];
