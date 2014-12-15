@@ -2,7 +2,6 @@
   "name": "swivel",
   "version": "0.0.1",
   "dependencies": {
-    "jquery": "~2.1.1"
   },
   "main": "swivel.js",
   "homepage": "https://github.com/mode/swiveljs",

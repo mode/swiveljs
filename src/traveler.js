@@ -74,9 +74,9 @@ swivel.traveler = function(tree, map) {
 
       // no more fields available
       if(nextFieldIdx == fieldNames.length) {
-        $.extend(row, visitValues(node));
+        swivel.merge(row, visitValues(node));
       } else if(nextField.isColumn()) {
-        $.extend(row, visitColumn(node, nextFieldIdx));
+        swivel.merge(row, visitColumn(node, nextFieldIdx));
       }
 
       rows.push(row);
@@ -114,7 +114,7 @@ swivel.traveler = function(tree, map) {
         colValue[value] = visitColumn(node, nextFieldIdx);
       }
 
-      $.extend(row, colValue);
+      swivel.merge(row, colValue);
     });
 
     return row;

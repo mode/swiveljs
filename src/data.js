@@ -6,7 +6,7 @@ swivel.data = function(data) {
   // Public
 
   function fields() {
-    var fields = swivel.util.argArray(arguments);
+    var fields = swivel.args(arguments);
 
     var map  = swivel.map(fields);
     var tree = swivel.tree(fields);

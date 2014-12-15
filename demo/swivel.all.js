@@ -6,7 +6,7 @@ swivel.data = function(data) {
   // Public
 
   function fields() {
-    var fields = swivel.util.argArray(arguments);
+    var fields = swivel.args(arguments);
 
     var map  = swivel.map(fields);
     var tree = swivel.tree(fields);
@@ -53,7 +53,7 @@ swivel.map = function(fields) {
   };
 
   function pivot() {
-    var pivotFields = [].concat(swivel.util.argArray(arguments));
+    var pivotFields = [].concat(swivel.args(arguments));
 
     // Reset Orientation
     for(var i = 0; i < fields.length; i++) {
@@ -226,9 +226,9 @@ swivel.traveler = function(tree, map) {
 
       // no more fields available
       if(nextFieldIdx == fieldNames.length) {
-        $.extend(row, visitValues(node));
+        swivel.merge(row, visitValues(node));
       } else if(nextField.isColumn()) {
-        $.extend(row, visitColumn(node, nextFieldIdx));
+        swivel.merge(row, visitColumn(node, nextFieldIdx));
       }
 
       rows.push(row);
@@ -266,7 +266,7 @@ swivel.traveler = function(tree, map) {
         colValue[value] = visitColumn(node, nextFieldIdx);
       }
 
-      $.extend(row, colValue);
+      swivel.merge(row, colValue);
     });
 
     return row;
@@ -398,9 +398,14 @@ swivel.tree = function(fields) {
   return _tree;
 }
 
-swivel.util = {};
-swivel.util.argArray = function(args) {
+swivel.args = function(args) {
   return Array.prototype.slice.call(args, 0);
+};
+
+swivel.merge = function(target, source) {
+  for (var attr in source) {
+    target[attr] = source[attr];
+  }
 };
 
 swivel.average = function(field) {

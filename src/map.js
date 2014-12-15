@@ -34,7 +34,7 @@ swivel.map = function(fields) {
   };
 
   function pivot() {
-    var pivotFields = [].concat(swivel.util.argArray(arguments));
+    var pivotFields = [].concat(swivel.args(arguments));
 
     // Reset Orientation
     for(var i = 0; i < fields.length; i++) {
