@@ -146,13 +146,13 @@ swivel.traveler = function(tree, map) {
       nodeRows.push(rows[node[i]]);
     }
 
-    var values     = {};
-    var selections = map.getValues();
-    var aliases    = Object.keys(selections);
+    var values  = {};
+    var selects = map.getSelects();
+    var aliases = Object.keys(selects);
 
     for(var i = 0; i < aliases.length; i++) {
       var alias = aliases[i];
-      var aggFn = selections[alias];
+      var aggFn = selects[alias];
 
       values[alias] = aggFn(nodeRows);
     }

@@ -18,7 +18,7 @@ swivel.data = function(data) {
 }
 
 swivel.map = function(fields) {
-  var values   = {};
+  var selects  = {};
   var fieldMap = {};
 
   var _map = {
@@ -29,7 +29,7 @@ swivel.map = function(fields) {
     hasColumns: hasColumns,
 
     getField: getField,
-    getValues: getValues,
+    getSelects: getSelects,
     getFieldNames: getFieldNames,
     getRowFieldNames: getRowFieldNames,
     getColumnFieldNames: getColumnFieldNames,
@@ -38,16 +38,17 @@ swivel.map = function(fields) {
 
   for(var i = 0; i < fields.length; i++) {
     fieldMap[fields[i]] = {
-      orientation: 'r',
-      isRow: function() { return this.orientation == 'r'; },
-      isColumn: function() { return this.orientation == 'c'; }
+      column: false,
+      isRow: function() { return !this.column; },
+      isColumn: function() { return this.column; }
     }
   }
 
   // Public
 
-  function select(aggregate, alias) {
-    values[alias] = aggregate;
+  function select(aggFn, alias) {
+    selects[alias] = aggFn;
+
     return this;
   };
 
@@ -57,12 +58,12 @@ swivel.map = function(fields) {
 
     // Reset Orientation
     for(var i = 0; i < fields.length; i++) {
-      getField(fields[i]).orientation = 'r';
+      getField(fields[i]).column = false;
     }
 
     // Set Pivot Fields to 'c' (column)
     for(var i = 0; i < pivotFields.length; i++) {
-      getField(pivotFields[i]).orientation = 'c';
+      getField(pivotFields[i]).column = true;
     }
 
     return this;
@@ -112,8 +113,8 @@ swivel.map = function(fields) {
 
   // Basic Accessors
 
-  function getValues() {
-    return values;
+  function getSelects() {
+    return selects;
   }
 
   function getField(fieldName) {
@@ -298,13 +299,13 @@ swivel.traveler = function(tree, map) {
       nodeRows.push(rows[node[i]]);
     }
 
-    var values     = {};
-    var selections = map.getValues();
-    var aliases    = Object.keys(selections);
+    var values  = {};
+    var selects = map.getSelects();
+    var aliases = Object.keys(selects);
 
     for(var i = 0; i < aliases.length; i++) {
       var alias = aliases[i];
-      var aggFn = selections[alias];
+      var aggFn = selects[alias];
 
       values[alias] = aggFn(nodeRows);
     }

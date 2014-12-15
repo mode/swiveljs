@@ -1,5 +1,5 @@
 swivel.map = function(fields) {
-  var values   = {};
+  var selects  = {};
   var fieldMap = {};
 
   var _map = {
@@ -10,7 +10,7 @@ swivel.map = function(fields) {
     hasColumns: hasColumns,
 
     getField: getField,
-    getValues: getValues,
+    getSelects: getSelects,
     getFieldNames: getFieldNames,
     getRowFieldNames: getRowFieldNames,
     getColumnFieldNames: getColumnFieldNames,
@@ -19,16 +19,17 @@ swivel.map = function(fields) {
 
   for(var i = 0; i < fields.length; i++) {
     fieldMap[fields[i]] = {
-      orientation: 'r',
-      isRow: function() { return this.orientation == 'r'; },
-      isColumn: function() { return this.orientation == 'c'; }
+      column: false,
+      isRow: function() { return !this.column; },
+      isColumn: function() { return this.column; }
     }
   }
 
   // Public
 
-  function select(aggregate, alias) {
-    values[alias] = aggregate;
+  function select(aggFn, alias) {
+    selects[alias] = aggFn;
+
     return this;
   };
 
@@ -38,12 +39,12 @@ swivel.map = function(fields) {
 
     // Reset Orientation
     for(var i = 0; i < fields.length; i++) {
-      getField(fields[i]).orientation = 'r';
+      getField(fields[i]).column = false;
     }
 
     // Set Pivot Fields to 'c' (column)
     for(var i = 0; i < pivotFields.length; i++) {
-      getField(pivotFields[i]).orientation = 'c';
+      getField(pivotFields[i]).column = true;
     }
 
     return this;
@@ -93,8 +94,8 @@ swivel.map = function(fields) {
 
   // Basic Accessors
 
-  function getValues() {
-    return values;
+  function getSelects() {
+    return selects;
   }
 
   function getField(fieldName) {
