@@ -145,11 +145,11 @@ swivel.traveler = function(tree, map) {
 
   // Return Object
   var _traveler = {
-    pivots: pivots,
+    all: all,
     data: data,
     where: where,
     select: select,
-    all: all,
+    pivots: pivots
   };
 
   // Public
