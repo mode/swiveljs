@@ -51,13 +51,18 @@ the field in the dataset that you want to aggregate over
 The name of the field in the flattened row, defaults to <field>
 */
 
-function Swivel(rows) {
+function swivel(rows) {
   this.rows = rows;
-};
 
-Swivel.prototype = {
-  groupBy: function() {
+  function groupBy() {
     var fields = Array.prototype.slice.call(arguments);
     return (new Swivel.Grouping(this, fields)).groupAll();
   }
+
+  return {
+    rows: rows,
+    groupBy: groupBy
+  }
 };
+
+Swivel = {};

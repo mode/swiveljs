@@ -23,21 +23,6 @@ Swivel.Grouping.prototype = {
     return this;
   },
 
-  flattenAll: function(callback) {
-    var flattened = [];
-    var fields    = this.fields;
-    var groups    = this._groups;
-
-    var self = this;
-    this.eachGroup({}, groups, fields, 0, function(rows, group) {
-      var row = {};
-      var values = callback(self.fetchRows(rows), group);
-      $.extend(row, group, values);
-      flattened.push(row);
-    });
-    return flattened;
-  },
-
   pivotLeft: function(pivotField, callback) {
     if(typeof callback === 'undefined') {
       callback = Swivel.Grouping.Count();
@@ -152,22 +137,5 @@ Swivel.Grouping.prototype = {
       rows.push(this._parent.rows[idx]);
     }
     return rows;
-  },
-
-  // Returns: A list of row indices contained in every subtree of a node
-  collectIndexes: function(groups, fields, fieldIdx) {
-    if(fieldIdx == fields.length - 1) {
-      return groups;
-    }
-
-    var collected = [];
-
-    var groupKeys = Object.keys(groups);
-    for(var k = 0; k < groupKeys.length; k++) {
-      var groupNode = groups[groupKeys[k]];
-      collected.concat(this.collectIndexes(groupNode, fields, fieldIdx + 1));
-    }
-
-    return collected;
   }
 };
