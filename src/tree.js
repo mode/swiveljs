@@ -62,7 +62,7 @@ swivel.tree = function(fields) {
 
   function insertOne(node, row, rowIdx, fields, fieldIdx) {
     var field      = fields[fieldIdx];
-    var value      = row[fields[fieldIdx]];
+    var value      = row[field];
     var isLeafNode = (fieldIdx + 1 == fields.length);
 
     // Insert Field
@@ -74,9 +74,7 @@ swivel.tree = function(fields) {
     // Update Field Count
 
     if(!(value in values[field])) {
-      values[field][value] = 1;
-    } else {
-      values[field][value] += 1;
+      values[field][value] = true;
     }
 
     // Insert Group

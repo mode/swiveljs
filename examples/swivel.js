@@ -152,7 +152,11 @@ swivel.traveler = function(tree, map) {
   };
 
   function all() {
+    var start = Date.now();
+
     insertAll();
+
+    console.debug("Insertion Time", Date.now() - start);
 
     var result = {
       values: function(fieldName) {
@@ -160,11 +164,15 @@ swivel.traveler = function(tree, map) {
       }
     };
 
+    start = Date.now();
+
     if(map.hasRows()) {
       result['data'] = visitRows(tree.getRoot(), 0);
     } else {
       result['data'] = visitColumn(tree.getRoot(), 0);
     }
+
+    console.debug("Traversal Time", Date.now() - start);
 
     return result;
   }
@@ -344,7 +352,7 @@ swivel.tree = function(fields) {
 
   function insertOne(node, row, rowIdx, fields, fieldIdx) {
     var field      = fields[fieldIdx];
-    var value      = row[fields[fieldIdx]];
+    var value      = row[field];
     var isLeafNode = (fieldIdx + 1 == fields.length);
 
     // Insert Field
@@ -356,9 +364,7 @@ swivel.tree = function(fields) {
     // Update Field Count
 
     if(!(value in values[field])) {
-      values[field][value] = 1;
-    } else {
-      values[field][value] += 1;
+      values[field][value] = true;
     }
 
     // Insert Group
@@ -473,7 +479,7 @@ swivel.median = function(field) {
   };
 };
 
-swivel.stddev = function(field) {
+swivel.stdDev = function(field) {
   var average = function(rows) {
     var sum = 0;
     for(var i = 0; i < rows.length; i++) {

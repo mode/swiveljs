@@ -39,7 +39,11 @@ swivel.traveler = function(tree, map) {
   };
 
   function all() {
+    var start = Date.now();
+
     insertAll();
+
+    console.debug("Insertion Time", Date.now() - start);
 
     var result = {
       values: function(fieldName) {
@@ -47,11 +51,15 @@ swivel.traveler = function(tree, map) {
       }
     };
 
+    start = Date.now();
+
     if(map.hasRows()) {
       result['data'] = visitRows(tree.getRoot(), 0);
     } else {
       result['data'] = visitColumn(tree.getRoot(), 0);
     }
+
+    console.debug("Traversal Time", Date.now() - start);
 
     return result;
   }

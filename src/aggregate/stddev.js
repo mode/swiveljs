@@ -1,4 +1,4 @@
-swivel.stddev = function(field) {
+swivel.stdDev = function(field) {
   var average = function(rows) {
     var sum = 0;
     for(var i = 0; i < rows.length; i++) {
