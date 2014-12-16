@@ -1,0 +1,11 @@
+user,event_name,device,events
+A,signup,iphone6,1
+A,login,iphone6,1
+A,send_message,iphone6,2
+B,signup,macbookpro,1
+B,login,macbookpro,1
+B,like_message,macbookpro,4
+C,signup,surface,1
+C,login,surface,1
+D,view_inbox,macbookpro,1
+D,send_message,macbookpro,1
