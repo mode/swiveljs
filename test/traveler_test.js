@@ -121,4 +121,59 @@ describe("Traveler", function () {
       });
     });
   });
+
+  it("multiple fields with center field pivot", function() {
+    datasets.events(function(data) {
+      var fields   = ['user','device', 'event_name'];
+      var map      = swivel.map(fields);
+      var tree     = swivel.tree(fields);
+      var traveler = swivel.traveler(tree, map);
+
+      var results = traveler.data(data)
+        .pivots('device')
+        .select(swivel.sum('events'), 'events')
+        .all();
+
+      should(results.data).eql([
+        {
+          iphone6: [
+            { event_name: 'signup', events: 1 },
+            { event_name: 'login', events: 1 },
+            { event_name: 'send_message', events: 2 }
+          ],
+          macbookpro: null,
+          surface: null,
+          user: 'A'
+        },
+        {
+          iphone6: null,
+          macbookpro: [
+            { event_name: 'signup', events: 1 },
+            { event_name: 'login', events: 1 },
+            { event_name: 'like_message', events: 4 }
+          ],
+          surface: null,
+          user: 'B'
+        },
+        {
+          iphone6: null,
+          macbookpro: null,
+          surface: [
+            { event_name: 'signup', events: 1 },
+            { event_name: 'login', events: 1 }
+          ],
+          user: 'C'
+        },
+        {
+          iphone6: null,
+          macbookpro: [
+            { event_name: 'send_message', events: 1 },
+            { event_name: 'view_inbox', events: 1 }
+          ],
+          surface: null,
+          user: 'D'
+        }
+      ]);
+    });
+  });
 });
