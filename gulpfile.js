@@ -20,7 +20,7 @@ gulp.task('connect', function() {
 
 gulp.task('build', function() {
   return gulp.src('src/**/*.js')
-    .pipe(concat('swivel.all.js'))
+    .pipe(concat('swivel.js'))
     .pipe(gulp.dest(dist))
     .pipe(filesize())
     .pipe(gulp.dest(examples));
@@ -41,7 +41,7 @@ gulp.task('build:watch', function() {
 });
 
 gulp.task('test:watch', function () {
-  return gulp.watch(['src/**/*.js', 'test/**/*.js'], ['test']);
+  return gulp.watch(['src/**/*.js', 'test/**/*.js'], ['build', 'test']);
 });
 
 gulp.task('default', ['connect', 'build:watch']);

@@ -15,4 +15,4 @@ swivel.data = function(data) {
   };
 
   return _data;
-}
+};

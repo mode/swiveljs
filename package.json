@@ -21,6 +21,8 @@
   "homepage": "https://github.com/mode/swiveljs",
 
   "devDependencies": {
+    "smash": "*",
+    "should": "*",
     "gulp": "~3.8.10",
     "gulp-watch": "*",
     "gulp-clean": "*",
@@ -30,7 +32,6 @@
     "gulp-uglify": "*",
     "gulp-filesize": "*",
     "gulp-continuous-concat": "*",
-    "gulp-connect": "*",
-    "should": "*"
+    "gulp-connect": "*"
   }
 }
