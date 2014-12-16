@@ -79,7 +79,7 @@
           var pivotted = $scope.pivot
             .fields($scope.rows, $scope.columns)
             .pivots($scope.columns)
-            .select(swivel.sum('events'), 'Total Events')
+            .select(swivel.aggregate($scope.valueFn, $scope.valueField), $scope.valueField)
             .all();
 
           var sortedData = pivotted.data.sort(function(r1, r2) {
@@ -143,7 +143,20 @@
           if(angular.isDefined(value) && value !== oldValue) {
             renderTable();
           }
-        })
+        });
+
+        $scope.$watch('valueFn', function(value, oldValue) {
+          if(angular.isDefined(value) && value !== oldValue) {
+            renderTable();
+          }
+        });
+
+        $scope.$watch('valueField', function(value, oldValue) {
+          if(angular.isDefined(value) && value !== oldValue) {
+            renderTable();
+          }
+        });
+        
       }]);
     </script>
   </body>
