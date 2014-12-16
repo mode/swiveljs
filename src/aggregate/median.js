@@ -2,7 +2,7 @@ swivel.median = function(field) {
   return function(rows) {
     var values = [];
     for(var r = 0; r < rows.length; r++) {
-      values.push(rows[r][field]);
+      values.push(+rows[r][field]);
     }
 
     var value = NaN;

@@ -3,7 +3,7 @@ swivel.sum = function(field) {
     var sum = 0;
 
     for(var r = 0; r < rows.length; r++) {
-      var value = rows[r][field];
+      var value = +rows[r][field];
 
       if(value === NaN) {
         return NaN;

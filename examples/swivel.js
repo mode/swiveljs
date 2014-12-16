@@ -152,11 +152,7 @@ swivel.traveler = function(tree, map) {
   };
 
   function all() {
-    var start = Date.now();
-
     insertAll();
-
-    console.debug("Insertion Time", Date.now() - start);
 
     var result = {
       values: function(fieldName) {
@@ -164,15 +160,13 @@ swivel.traveler = function(tree, map) {
       }
     };
 
-    start = Date.now();
+    // this isn't right, should be if the *first* field is a row
 
-    if(map.hasRows()) {
+    if(map.getFieldByIndex(0).isRow()) {
       result['data'] = visitRows(tree.getRoot(), 0);
     } else {
       result['data'] = visitColumn(tree.getRoot(), 0);
     }
-
-    console.debug("Traversal Time", Date.now() - start);
 
     return result;
   }
@@ -446,7 +440,7 @@ swivel.countUnique = function(field) {
   return function(rows) {
     var values = {};
     for(var r = 0; r < rows.length; r++) {
-      var value = rows[r][field];
+      var value = +rows[r][field];
 
       if(!(value in values)) {
         values[value] = true
@@ -461,7 +455,7 @@ swivel.median = function(field) {
   return function(rows) {
     var values = [];
     for(var r = 0; r < rows.length; r++) {
-      values.push(rows[r][field]);
+      values.push(+rows[r][field]);
     }
 
     var value = NaN;
@@ -521,7 +515,7 @@ swivel.sum = function(field) {
     var sum = 0;
 
     for(var r = 0; r < rows.length; r++) {
-      var value = rows[r][field];
+      var value = +rows[r][field];
 
       if(value === NaN) {
         return NaN;
