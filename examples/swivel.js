@@ -60,12 +60,6 @@ swivel.map = function(fields) {
     return this;
   };
 
-  function where(fieldName, filter) {
-    getField(fieldName).filters.push(filter);
-
-    return this;
-  };
-
   // Accessors
 
   function hasRows() {
