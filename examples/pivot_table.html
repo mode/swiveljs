@@ -1,4 +1,4 @@
-<html>
+<html ng-app="PivotTable">
   <head>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="index.css" />
   </head>
 
-  <body>
+  <body ng-controller="PivotTableController">
     <h1>Pivot Table Example</h1>
     <p>Total events by day for each location</p>
 
@@ -20,40 +20,41 @@
       <div>
         <div class="settings-label">Rows</div>
 
-        <select>
-          <option>Day</option>
-          <option>Device</option>
-          <option>Location</option>
+        <select ng-model="rows">
+          <option value="day">Day</option>
+          <option value="device">Device</option>
+          <option value="location">Location</option>
         </select>
       </div>
 
       <div>
         <div class="settings-label">Columns</div>
 
-        <select>
-          <option>Day</option>
-          <option>Device</option>
-          <option>Location</option>
+        <select ng-model="columns">
+          <option value="day">Day</option>
+          <option value="device">Device</option>
+          <option value="location">Location</option>
         </select>
       </div>
 
       <div id="pivot-values">
         <div class="settings-label">Values</div>
 
-        <select>
-          <option>Day</option>
-          <option>Device</option>
-          <option>Location</option>
-          <option>Events</option>
+        <select ng-model="valueField">
+          <option value="day">Day</option>
+          <option value="device">Device</option>
+          <option value="location">Location</option>
+          <option value="events">Events</option>
+          <option value="user_id">User ID</option>
         </select>
 
-        <select>
-          <option>Sum</option>
-          <option>Count</option>
-          <option>Unique</option>
-          <option>Average</option>
-          <option>Median</option>
-          <option>Standard Deviation</option>
+        <select ng-model="valueFn">
+          <option value="sum">Sum</option>
+          <option value="count">Count</option>
+          <option value="countUnique">Unique</option>
+          <option value="average">Average</option>
+          <option value="median">Median</option>
+          <option value="stdDev">Standard Deviation</option>
         </select>
       </div>
     </form>
@@ -61,58 +62,89 @@
     <div id="pivot-container"></div>
 
     <script type="text/javascript">
-      datasets.events(function(dataset) {
+      var app = angular.module("PivotTable", []);
 
-        //
-        // 'day': Date.parse(row['day']),
-        // 'event_name': row['event_name'],
-        // 'location': row['location'],
-        // 'device': row['device'],
-        // 'user_id': row['user_id'],
-        // 'events': +row['events']
-        //
+      app.controller("PivotTableController", ['$scope', function($scope) {
+        $scope.pivot;
 
-        var dayFormat = d3.time.format("%Y-%m-%d");
-        var dayParser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
+        $scope.rows       = 'day';
+        $scope.columns    = 'location';
+        $scope.valueFn    = 'sum';
+        $scope.valueField = 'events';
 
-        var pivot = swivel
-          .data(dataset)
-          .fields('day', 'location').pivots('location')
-          .select(swivel.sum('events'), 'Total Events')
-          .all();
+        var dateFormat = d3.time.format("%Y-%m-%d");
+        var dateParser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
 
-        var locations = pivot.values('location');
+        var renderTable = function() {
+          var pivotted = $scope.pivot
+            .fields($scope.rows, $scope.columns)
+            .pivots($scope.columns)
+            .select(swivel.sum('events'), 'Total Events')
+            .all();
 
-        var table = d3.select("#pivot-container").append("table"),
+          var sortedData = pivotted.data.sort(function(r1, r2) {
+            var v1 = r1[$scope.rows];
+            var v2 = r2[$scope.rows];
+
+            if ( v1 < v2 ) {
+              return -1;
+            } else if ( v1 > v2 ) {
+              return 1;
+            } else {
+              return 0;
+            }
+          });
+
+          var columnValues = pivotted.values($scope.columns).sort();
+
+          d3.select("#pivot-container table").remove(); // clean out old table
+          var table = d3.select("#pivot-container").append("table"),
             thead = table.append("thead"),
             tbody = table.append("tbody");
 
-        thead.append("tr")
-        .selectAll("td")
-          .data(function() {
-            var columns = ['Day'];
-            for(var i = 0; i < locations.length; i++) {
-              columns.push(locations[i]);
-            }
-            return columns;
-          }).enter().append("td")
-        .text(function(column){ return column; });
+          thead.append("tr")
+            .selectAll("td")
+              .data(function() {
+                var columns = [$scope.rows];
+                for(var i = 0; i < columnValues.length; i++) {
+                  columns.push(columnValues[i]);
+                }
+                return columns;
+              }).enter().append("td")
+            .text(function(column){ return column; });
 
-        tbody.selectAll("tr")
-          .data(pivot.data)
-          .enter().append("tr")
-        .selectAll("td")
-          .data(function(row) {
-            var day = row['day'];
-            var day = dayParser(day);
-            var values = [dayFormat(day)];
-            for(var i = 0; i < locations.length; i++) {
-              values.push(row[locations[i]]);
-            }
-            return values;
-          }).enter().append("td")
-        .text(function(row){ return row; })
-      });
+          tbody.selectAll("tr")
+            .data(sortedData)
+            .enter().append("tr")
+          .selectAll("td")
+            .data(function(row) {
+              var values = [row[$scope.rows]];
+              for(var i = 0; i < columnValues.length; i++) {
+                values.push(row[columnValues[i]]);
+              }
+              return values;
+            }).enter().append("td")
+          .text(function(row){ return row; })
+        }
+
+        datasets.events(function(dataset) {
+          $scope.pivot = swivel.data(dataset);
+
+          renderTable();
+        });
+
+        $scope.$watch('rows', function(value, oldValue) {
+          if(angular.isDefined(value) && value !== oldValue) {
+            renderTable();
+          }
+        });
+
+        $scope.$watch('columns', function(value, oldValue) {
+          if(angular.isDefined(value) && value !== oldValue) {
+            renderTable();
+          }
+        })
+      }]);
     </script>
   </body>
 </html>
