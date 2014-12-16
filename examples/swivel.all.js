@@ -160,7 +160,6 @@ swivel.traveler = function(tree, map) {
     return this;
   };
 
-
   function data(newRows) {
     rows = rows.concat(newRows);
 

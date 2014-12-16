@@ -30,6 +30,7 @@
     "gulp-uglify": "*",
     "gulp-filesize": "*",
     "gulp-continuous-concat": "*",
-    "gulp-connect": "*"
+    "gulp-connect": "*",
+    "should": "*"
   }
 }
