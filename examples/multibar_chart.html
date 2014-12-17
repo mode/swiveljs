@@ -1,0 +1,138 @@
+<html>
+<head>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.css" />
+
+<script src="swivel.js"></script>
+
+<script src="index.js"></script>
+<link rel="stylesheet" href="index.css" />
+</head>
+
+<body>
+  <h1>Multibar Chart Example</h1>
+
+  <p>Total yards by season for each team in the NFL during the 2000 to 2013 seasons.</p>
+
+  <div id="chart">
+    <svg style="height:500px; width:95%;"></svg>
+  </div>
+
+  <h2>Sample Code</h2>
+
+  <pre class="prettyprint">
+datasets.nfl(function(dataset) {
+  var pivot = swivel(dataset.content)
+    .fields('team', 'season').pivots('season')
+    .select(swivel.sum('yards'), 'Total Yards')
+    .where(function(row) { return row['season'] >= 2010 && row['season'] < 2014; })
+    .where(function(row) { return ['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0; })
+    .all();
+
+  nv.addGraph(function() {
+    var chart = nv.models.multiBarChart()
+      .margin({left: 100})
+      .showLegend(true)
+      .showYAxis(true)
+      .showXAxis(true);
+
+    chart.xAxis
+      .axisLabel('Season');
+
+    chart.yAxis
+      .axisLabel('Total Yards')
+      .tickFormat(d3.format('.0f'));
+
+    // Getting Data Together
+
+    var data        = [];
+    var axisName    = 'team';
+    var seriesNames = pivot.values('season');
+
+    // Initialize Series
+    for(var s = 0; s < seriesNames.length; s++) {
+      data.push({ key: seriesNames[s], values: [] });
+    }
+
+    // Populate Series
+    for(var p = 0; p < pivot.data.length; p++) {
+      var row = pivot.data[p];
+
+      for(var s = 0; s < seriesNames.length; s++) {
+        data[s].values.push({
+          x: row[axisName],
+          y: row[seriesNames[s]],
+          label: row[axisName]
+        });
+      }
+    }
+
+    // End Getting Data Together
+
+    d3.select('#chart svg').datum(data).call(chart);
+
+    return chart;
+  });
+});
+  </pre>
+
+  <script type="text/javascript">
+    datasets.nfl(function(dataset) {
+      var pivot = swivel(dataset.content)
+        .fields('team', 'season').pivots('season')
+        .select(swivel.sum('yards'), 'Total Yards')
+        .where(function(row) { return row['season'] >= 2010 && row['season'] < 2014; })
+        .where(function(row) { return ['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0; })
+        .all();
+
+      nv.addGraph(function() {
+        var chart = nv.models.multiBarChart()
+          .margin({left: 100})
+          .showLegend(true)
+          .showYAxis(true)
+          .showXAxis(true);
+
+        chart.xAxis
+          .axisLabel('Season');
+
+        chart.yAxis
+          .axisLabel('Total Yards')
+          .tickFormat(d3.format('.0f'));
+
+        // Getting Data Together
+
+        var data        = [];
+        var axisName    = 'team';
+        var seriesNames = pivot.values('season');
+
+        // Initialize Series
+        for(var s = 0; s < seriesNames.length; s++) {
+          data.push({ key: seriesNames[s], values: [] });
+        }
+
+        // Populate Series
+        for(var p = 0; p < pivot.data.length; p++) {
+          var row = pivot.data[p];
+
+          for(var s = 0; s < seriesNames.length; s++) {
+            data[s].values.push({
+              x: row[axisName],
+              y: row[seriesNames[s]],
+              label: row[axisName]
+            });
+          }
+        }
+
+        // End Getting Data Together
+
+        d3.select('#chart svg').datum(data).call(chart);
+
+        return chart;
+      });
+    });
+  </script>
+</body>
+</html>
