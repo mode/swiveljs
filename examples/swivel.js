@@ -165,7 +165,7 @@ swivel.traveler = function(tree, map) {
 
     var result = {
       values: function(fieldName) {
-        if(tree.length == 0) {
+        if(tree.isEmpty()) {
           return [];
         } else {
           return Object.keys(tree.getValues(fieldName));
@@ -175,7 +175,7 @@ swivel.traveler = function(tree, map) {
 
     // this isn't right, should be if the *first* field is a row
 
-    if(tree.length == 0) {
+    if(tree.isEmpty()) {
       result['data'] = [];
     } else {
       if(map.getFieldByIndex(0).isRow()) {
@@ -305,8 +305,8 @@ swivel.tree = function(fields) {
   var values = {};
 
   var _tree = {
-    length: length,
     insert: insert,
+    isEmpty: isEmpty,
     getRoot: getRoot,
     getValues: getValues,
     eachValue: eachValue,
@@ -314,6 +314,10 @@ swivel.tree = function(fields) {
   };
 
   // Public
+  function isEmpty() {
+    return length == 0;
+  }
+
   function getRoot() {
     return root;
   };

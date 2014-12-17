@@ -31,7 +31,6 @@
         ng-model="teams" ng-options="t for t in allTeams"></select>
     </div>
 
-
     <div id="chart">
       <svg style="height:500px; width:95%;"></svg>
     </div>
@@ -44,8 +43,21 @@
       app.controller("LineChartController", ['$scope', '$q', function($scope, $q) {
 
         $scope.dataset;
-        $scope.teams = [];
+        $scope.teams = ['ARI', 'SEA', 'SFO', 'STL'];
         $scope.allTeams = [];
+
+
+        $scope.$watch('teams', function(value, oldValue) {
+          if(angular.isDefined(value) && oldValue !== value) {
+            redraw();
+          }
+        });
+
+        $scope.$watch('dataset', function(value, oldValue) {
+          if(angular.isDefined(value) && oldValue !== value) {
+            redraw();
+          }
+        });
 
         function redraw() {
           var teams = {};
@@ -59,8 +71,8 @@
           var pivot = swivel($scope.dataset)
             .fields('season', 'team').pivots('team')
             .select(swivel.sum('yards'), 'Total Yards')
-            .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
             .where(function(row) { return $scope.teams.indexOf(row['team']) >= 0; })
+            .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
             .all();
 
           nv.addGraph(function() {
@@ -110,18 +122,6 @@
             return chart;
           });
         };
-
-        $scope.$watch('teams', function(value, oldValue) {
-          if(angular.isDefined(value) && oldValue !== value) {
-            redraw();
-          }
-        });
-
-        $scope.$watch('dataset', function(value, oldValue) {
-          if(angular.isDefined(value) && oldValue !== value) {
-            redraw();
-          }
-        });
 
         datasets.nfl(function(dataset) {
           $scope.$apply(function() {

@@ -4,8 +4,8 @@ swivel.tree = function(fields) {
   var values = {};
 
   var _tree = {
-    length: length,
     insert: insert,
+    isEmpty: isEmpty,
     getRoot: getRoot,
     getValues: getValues,
     eachValue: eachValue,
@@ -13,6 +13,10 @@ swivel.tree = function(fields) {
   };
 
   // Public
+  function isEmpty() {
+    return length == 0;
+  }
+
   function getRoot() {
     return root;
   };
