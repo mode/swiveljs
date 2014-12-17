@@ -42,8 +42,8 @@ swivel.tree = function(fields) {
     }
 
     var field     = fields[fieldIdx];
-    var counts    = values[field];
-    var valueKeys = Object.keys(counts);
+    var fValues   = values[field];
+    var valueKeys = Object.keys(fValues);
 
     // add to group and recurse
     for(var v = 0; v < valueKeys.length; v++) {
