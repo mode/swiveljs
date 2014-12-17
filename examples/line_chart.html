@@ -22,12 +22,16 @@
   </head>
 
   <body ng-controller="LineChartController">
+    <h3>
+      <a href="/index.html">Swivel Examples</a>
+    </h3>
+    
     <h1>Line Chart Example</h1>
 
     <p>Total yards by season during the 2000 to 2013 seasons.</p>
 
     <div>
-      <select chosen multiple id="teams" style="width:250px;"
+      <select chosen multiple id="teams" style="width:450px;"
         ng-model="teams" ng-options="t for t in allTeams"></select>
     </div>
 
@@ -37,15 +41,15 @@
 
     <h2>Sample Code</h2>
 
+    <script src="https://gist.github.com/besquared/473ff5ebb46028f4af44.js"></script>
+
     <script type="text/javascript">
       var app = angular.module("LineChart", ['localytics.directives']);
 
-      app.controller("LineChartController", ['$scope', '$q', function($scope, $q) {
-
+      app.controller("LineChartController", ['$scope', function($scope) {
         $scope.dataset;
-        $scope.teams = ['ARI', 'SEA', 'SFO', 'STL'];
         $scope.allTeams = [];
-
+        $scope.teams = ['ARI', 'SEA', 'SFO', 'STL'];
 
         $scope.$watch('teams', function(value, oldValue) {
           if(angular.isDefined(value) && oldValue !== value) {

@@ -13,6 +13,10 @@
 </head>
 
 <body>
+  <h3>
+    <a href="/index.html">Swivel Examples</a>
+  </h3>
+  
   <h1>Multibar Chart Example</h1>
 
   <p>Total yards for NFC teams for the 2010-2014 seasons.</p>
@@ -23,63 +27,7 @@
 
   <h2>Sample Code</h2>
 
-  <pre class="prettyprint">
-datasets.nfl(function(dataset) {
-  var pivot = swivel(dataset.content)
-    .fields('team', 'season').pivots('season')
-    .select(swivel.sum('yards'), 'Total Yards')
-    .where(function(row) { return row['season'] >= 2010 && row['season'] < 2014; })
-    .where(function(row) { return ['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0; })
-    .all();
-
-  nv.addGraph(function() {
-    var chart = nv.models.multiBarChart()
-      .margin({left: 100})
-      .showLegend(true)
-      .showYAxis(true)
-      .showXAxis(true);
-
-    chart.xAxis
-      .axisLabel('Team');
-
-    chart.yAxis
-      .axisLabel('Total Yards')
-      .tickFormat(d3.format('.0f'));
-
-    // Getting Data Together
-
-    var data        = [];
-    var axisName    = 'team';
-    var seriesNames = pivot.values('season');
-
-    // Initialize Series
-    for(var s = 0; s < seriesNames.length; s++) {
-      data.push({ key: seriesNames[s], values: [] });
-    }
-
-    // Populate Series
-    for(var p = 0; p < pivot.data.length; p++) {
-      var row = pivot.data[p];
-
-      for(var s = 0; s < seriesNames.length; s++) {
-        data[s].values.push({
-          x: row[axisName],
-          y: row[seriesNames[s]],
-          label: row[axisName]
-        });
-      }
-    }
-
-    // End Getting Data Together
-
-    d3.select('#chart svg').datum(data).call(chart);
-
-    nv.utils.windowResize(chart.update);
-
-    return chart;
-  });
-});
-  </pre>
+  <script src="https://gist.github.com/besquared/fee89ed75cad7d34e11b.js"></script>
 
   <script type="text/javascript">
     datasets.nfl(function(dataset) {
