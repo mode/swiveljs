@@ -1,31 +1,10 @@
 function swivel(rows) {
-  var _data = [];
+  var tree     = swivel.tree();
+  var traveler = swivel.traveler(tree);
 
   if(typeof rows !== 'undefined') {
-    data(rows);
+    traveler.data(rows);
   }
 
-  var _swivel = {
-    data: data,
-    fields: fields
-  };
-
-  // Public
-
-  function data(rows) {
-    _data = _data.concat(rows);
-
-    return this;
-  };
-
-  function fields() {
-    var fields = swivel.args(arguments);
-
-    var map  = swivel.map(fields);
-    var tree = swivel.tree(fields);
-
-    return swivel.traveler(tree, map).data(_data);
-  };
-
-  return _swivel;
+  return traveler;
 };

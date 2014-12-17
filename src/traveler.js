@@ -1,24 +1,24 @@
 swivel.traveler = function(tree, map) {
-  var rows    = [];
-  var wheres  = [];
-  var selects = {};
+  var rows = [];
+  var path = [];
+  var aggs = [];
 
   // Return Object
   var _traveler = {
     all: all,
     data: data,
-    where: where,
-    select: select,
-    pivots: pivots
+    group: group,
+    pivot: pivot,
+    aggregate: aggregate,
+    count: count,
+    countUnique: countUnique,
+    sum: sum,
+    average: average,
+    median: median,
+    stdDev: stdDev
   };
 
   // Public
-
-  function pivots() {
-    map.pivots.apply(map, arguments);
-
-    return this;
-  };
 
   function data(newRows) {
     rows = rows.concat(newRows);
@@ -26,14 +26,65 @@ swivel.traveler = function(tree, map) {
     return this;
   };
 
-  function where(whereFn) {
-    wheres.push(whereFn);
+  function group() {
+    var fields = [].concat(swivel.args(arguments));
+
+    for(var i = 0; i < fields.length; i++) {
+      tree.field(fields[i]);
+      path.push({'type': 'group', 'name': fields[i]});
+    }
+
+    return this;
+  }
+
+  function pivot() {
+    var fields = [].concat(swivel.args(arguments));
+
+    for(var i = 0; i < fields.length; i++) {
+      tree.field(fields[i]);
+      path.push({'type': 'pivot', 'name': fields[i]});
+    }
 
     return this;
   };
 
-  function select(aggFn, alias) {
-    selects[alias] = aggFn;
+  function aggregate(type, field, opts) {
+    aggs.push({
+      'as': opts['as'] || field,
+      'callback': swivel.aggregate(type, field, opts)
+    });
+
+    return this;
+  };
+
+  function count(field, opts) {
+    return aggregate.call(this, 'count', field, opts);
+  };
+
+  function countUnique(field, opts) {
+    return aggregate.call(this, 'countUnique', field, opts);
+  };
+
+  function sum(field, opts) {
+    return aggregate.call(this, 'sum', field, opts);
+  };
+
+  function average(field, opts) {
+    return aggregate.call(this, 'average', field, opts);
+  };
+
+  function median(field, opts) {
+    return aggregate.call(this, 'median', field, opts);
+  };
+
+  function stdDev(field, opts) {
+    return aggregate.call(this, 'stdDev', field, opts);
+  };
+
+  // get rid of filters?
+  // should we provide some utility?
+  function where(whereFn) {
+    wheres.push(whereFn);
 
     return this;
   };
@@ -56,7 +107,7 @@ swivel.traveler = function(tree, map) {
     if(tree.isEmpty()) {
       result['data'] = [];
     } else {
-      if(map.getFieldByIndex(0).isRow()) {
+      if(path[0]['type'] == 'group') {
         result['data'] = visitRows(tree.getRoot(), 0);
       } else {
         result['data'] = visitColumn(tree.getRoot(), 0);
@@ -72,29 +123,53 @@ swivel.traveler = function(tree, map) {
     for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
       var row = rows[rowIdx];
 
-      var included = true;
-      for(var i = 0; i < wheres.length; i++) {
-        if(wheres[i](row) == false) {
-          included = false;
-          break;
-        }
-      }
-
-      if(included) {
+      // var included = true;
+      // for(var i = 0; i < wheres.length; i++) {
+      //   if(wheres[i](row) == false) {
+      //     included = false;
+      //     break;
+      //   }
+      // }
+      //
+      // if(included) {
         tree.insert(row, rowIdx);
-      }
+      // }
     }
   }
+
+  function getPathFields() {
+    var names = [];
+    for(var i = 0; i < path.length; i++) {
+      names.push(path[i]['name']);
+    }
+    return names;
+  };
+
+  function visitValues(node) {
+    var nodeRows = [];
+    for(var i = 0; i < node.length; i++) {
+      nodeRows.push(rows[node[i]]);
+    }
+
+    var values  = {};
+    for(var i = 0; i < aggs.length; i++) {
+      values[aggs[i]['as']] = aggs[i]['callback'](nodeRows);
+    }
+
+    return values;
+  };
 
   function visitRows(node, fieldIdx) {
     var rows = [];
 
     var currFields   = [];
     var nextFieldIdx = fieldIdx;
-    var fieldNames   = map.getFieldNames();
+    var fieldNames   = getPathFields();
+
+    console.log(fieldNames);
 
     for(var i = fieldIdx; i < fieldNames.length; i++) {
-      if(map.getFieldByIndex(i).isRow()) {
+      if(path[i]['type'] == 'group') {
         nextFieldIdx += 1;
         currFields.push(fieldNames[i]);
       } else {
@@ -102,15 +177,17 @@ swivel.traveler = function(tree, map) {
       }
     }
 
-    var nextField = map.getFieldByIndex(nextFieldIdx);
+    var nextField = path[nextFieldIdx];
+
+    console.log(currFields);
     tree.eachGroup({}, node, currFields, 0, function(node, branch) {
       var row = {};
       swivel.merge(row, branch);
 
       // no more fields available
       if(nextFieldIdx == fieldNames.length) {
-        swivel.merge(row, aggregateValues(node));
-      } else if(nextField.isColumn()) {
+        swivel.merge(row, visitValues(node));
+      } else if(nextField['type'] == 'pivot') {
         swivel.merge(row, visitColumn(node, nextFieldIdx));
       }
 
@@ -124,8 +201,8 @@ swivel.traveler = function(tree, map) {
     var row = {};
 
     var nextFieldIdx = fieldIdx + 1;
-    var fieldNames   = map.getFieldNames();
-    var nextField    = map.getFieldByIndex(nextFieldIdx);
+    var fieldNames   = getPathFields();
+    var nextField    = path[nextFieldIdx];
 
     tree.eachValue(node, fieldIdx, function(node, value) {
       var colValue = {};
@@ -133,7 +210,7 @@ swivel.traveler = function(tree, map) {
       if(typeof(node) === 'undefined') { // No branch at this value
         colValue[value] = null;
       } else if(nextFieldIdx == fieldNames.length) { // No more fields
-         var values = aggregateValues(node);
+         var values = visitValues(node);
 
         // Lift single values up to the higher level (make optional)
         var valueKeys = Object.keys(values);
@@ -143,9 +220,9 @@ swivel.traveler = function(tree, map) {
           colValue[value] = values;
         }
 
-      } else if(nextField.isRow()) {
+      } else if(nextField['type'] == 'group') {
         colValue[value] = visitRows(node, nextFieldIdx);
-      } else if(nextField.isColumn()) {
+      } else if(nextField['type'] == 'pivot') {
         colValue[value] = visitColumn(node, nextFieldIdx);
       }
 
@@ -153,25 +230,6 @@ swivel.traveler = function(tree, map) {
     });
 
     return row;
-  };
-
-  function aggregateValues(node) {
-    var nodeRows = [];
-    for(var i = 0; i < node.length; i++) {
-      nodeRows.push(rows[node[i]]);
-    }
-
-    var values  = {};
-    var aliases = Object.keys(selects);
-
-    for(var i = 0; i < aliases.length; i++) {
-      var alias = aliases[i];
-      var aggFn = selects[alias];
-
-      values[alias] = aggFn(nodeRows);
-    }
-
-    return values;
   };
 
   return _traveler;

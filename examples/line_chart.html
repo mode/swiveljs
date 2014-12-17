@@ -25,7 +25,7 @@
     <h3>
       <a href="/index.html">Swivel Examples</a>
     </h3>
-    
+
     <h1>Line Chart Example</h1>
 
     <p>Total yards by season during the 2000 to 2013 seasons.</p>
@@ -73,10 +73,9 @@
           $scope.allTeams = Object.keys(teams).sort();
 
           var pivot = swivel($scope.dataset)
-            .fields('season', 'team').pivots('team')
-            .select(swivel.sum('yards'), 'Total Yards')
-            .where(function(row) { return $scope.teams.indexOf(row['team']) >= 0; })
-            .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
+            .group('season')
+            .pivot('team')
+            .sum('yards', {'as': 'Total Yards'})
             .all();
 
           nv.addGraph(function() {

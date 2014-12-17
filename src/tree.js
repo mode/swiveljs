@@ -1,9 +1,11 @@
-swivel.tree = function(fields) {
+swivel.tree = function() {
   var length = 0;
   var root   = {};
   var values = {};
+  var fields = [];
 
   var _tree = {
+    field: field,
     insert: insert,
     isEmpty: isEmpty,
     getRoot: getRoot,
@@ -13,9 +15,14 @@ swivel.tree = function(fields) {
   };
 
   // Public
+
+  function field(name) {
+    fields.push(name);
+  };
+
   function isEmpty() {
     return length == 0;
-  }
+  };
 
   function getRoot() {
     return root;
@@ -43,12 +50,14 @@ swivel.tree = function(fields) {
     }
   };
 
-  function eachGroup(branch, node, fields, fieldIdx, callback) {
-    if(fieldIdx == fields.length) {
+  function eachGroup(branch, node, path, depth, callback) {
+    if(depth == path.length) {
       return callback(node, branch);
     }
 
-    var field     = fields[fieldIdx];
+    console.log(root);
+
+    var field     = path[depth];
     var fValues   = values[field];
     var valueKeys = Object.keys(fValues);
 
@@ -59,7 +68,7 @@ swivel.tree = function(fields) {
 
       if(typeof childNode !== "undefined") {
         branch[field] = valueKey;
-        eachGroup(branch, childNode, fields, fieldIdx + 1, callback);
+        eachGroup(branch, childNode, path, depth + 1, callback);
         delete branch[field];
       }
     }
@@ -67,10 +76,10 @@ swivel.tree = function(fields) {
 
   // Private
 
-  function insertOne(node, row, rowIdx, fields, fieldIdx) {
-    var field      = fields[fieldIdx];
+  function insertOne(node, row, rowIdx, path, depth) {
+    var field      = path[depth];
     var value      = row[field];
-    var isLeafNode = (fieldIdx + 1 == fields.length);
+    var isLeafNode = (depth + 1 == path.length);
 
     // Insert Field
 
@@ -100,7 +109,7 @@ swivel.tree = function(fields) {
     if(isLeafNode) {
       node[value].push(rowIdx);
     } else {
-      insertOne(node[value], row, rowIdx, fields, fieldIdx + 1);
+      insertOne(node[value], row, rowIdx, path, depth + 1);
     }
   };
 
