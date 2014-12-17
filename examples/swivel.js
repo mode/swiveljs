@@ -177,8 +177,6 @@ swivel.traveler = function(tree, map) {
     var nextFieldIdx = fieldIdx;
     var fieldNames   = getPathFields();
 
-    console.log(fieldNames);
-
     for(var i = fieldIdx; i < fieldNames.length; i++) {
       if(path[i]['type'] == 'group') {
         nextFieldIdx += 1;
@@ -189,9 +187,7 @@ swivel.traveler = function(tree, map) {
     }
 
     var nextField = path[nextFieldIdx];
-
-    console.log(currFields);
-    tree.eachGroup({}, node, currFields, 0, function(node, branch) {
+    tree.eachBranch({}, node, currFields, 0, function(node, branch) {
       var row = {};
       swivel.merge(row, branch);
 
@@ -259,7 +255,7 @@ swivel.tree = function() {
     getRoot: getRoot,
     getValues: getValues,
     eachValue: eachValue,
-    eachGroup: eachGroup
+    eachBranch: eachBranch
   };
 
   // Public
@@ -298,12 +294,10 @@ swivel.tree = function() {
     }
   };
 
-  function eachGroup(branch, node, path, depth, callback) {
+  function eachBranch(branch, node, path, depth, callback) {
     if(depth == path.length) {
       return callback(node, branch);
     }
-
-    console.log(root);
 
     var field     = path[depth];
     var fValues   = values[field];
@@ -316,7 +310,7 @@ swivel.tree = function() {
 
       if(typeof childNode !== "undefined") {
         branch[field] = valueKey;
-        eachGroup(branch, childNode, path, depth + 1, callback);
+        eachBranch(branch, childNode, path, depth + 1, callback);
         delete branch[field];
       }
     }

@@ -166,8 +166,6 @@ swivel.traveler = function(tree, map) {
     var nextFieldIdx = fieldIdx;
     var fieldNames   = getPathFields();
 
-    console.log(fieldNames);
-
     for(var i = fieldIdx; i < fieldNames.length; i++) {
       if(path[i]['type'] == 'group') {
         nextFieldIdx += 1;
@@ -178,9 +176,7 @@ swivel.traveler = function(tree, map) {
     }
 
     var nextField = path[nextFieldIdx];
-
-    console.log(currFields);
-    tree.eachGroup({}, node, currFields, 0, function(node, branch) {
+    tree.eachBranch({}, node, currFields, 0, function(node, branch) {
       var row = {};
       swivel.merge(row, branch);
 
