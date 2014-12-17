@@ -1,0 +1,91 @@
+<html>
+  <head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.css" />
+
+    <script src="swivel.js"></script>
+
+    <script src="index.js"></script>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+
+  <body>
+    <h3>
+      <a href="/index.html">Swivel Examples</a>
+    </h3>
+
+    <h1>Scatter Chart Example</h1>
+
+    <p>Relationship between average player age and total yards in each quarter across all seasons. Each dot here reprsents a team.</p>
+
+    <div id="chart">
+      <svg style="height:500px; width:95%;"></svg>
+    </div>
+
+    <h2>Sample Code</h2>
+
+    <script src="https://gist.github.com/besquared/670150bb34faba4d7ea2.js"></script>
+    
+    <script type="text/javascript">
+      datasets.nfl(function(dataset) {
+        var pivot = swivel(dataset.content)
+          .fields('team', 'quarter').pivots('quarter')
+          .select(swivel.sum('yards'),   'Total Yards')
+          .select(swivel.average('age'), 'Average Age')
+          .all();
+
+        nv.addGraph(function() {
+          var chart = nv.models.scatterChart();
+
+          chart.xAxis
+            .axisLabel('Average Player Age');
+
+          chart.yAxis
+            .axisLabel('Total Yards')
+            .tickFormat(d3.format('.0f'));
+
+          // Getting Data Together
+
+          var data        = [];
+          var axisName    = 'team';
+          var seriesNames = pivot.values('quarter');
+
+          // Initialize Series
+          for(var s = 0; s < seriesNames.length; s++) {
+            data.push({ key: seriesNames[s], values: [] });
+          }
+
+          // Populate Series
+          for(var p = 0; p < pivot.data.length; p++) {
+            var row = pivot.data[p];
+
+            for(var s = 0; s < seriesNames.length; s++) {
+              var seriesValues = row[seriesNames[s]];
+
+              if(seriesValues == null) {
+                data[s].values.push({label: null, x: null, y: null});
+              } else {
+                data[s].values.push({
+                  label: row[axisName],
+                  x: seriesValues['Average Age'],
+                  y: seriesValues['Total Yards']
+                });
+              }
+            }
+          }
+
+          // End Getting Data Together
+
+          d3.select('#chart svg').datum(data).call(chart);
+
+          nv.utils.windowResize(chart.update);
+
+          return chart;
+        });
+      });
+    </script>
+  </body>
+</html>

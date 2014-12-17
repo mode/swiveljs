@@ -1,90 +1,90 @@
 <html>
-<head>
-<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
+  <head>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.css" />
 
-<script src="swivel.js"></script>
+    <script src="swivel.js"></script>
 
-<script src="index.js"></script>
-<link rel="stylesheet" href="index.css" />
-</head>
+    <script src="index.js"></script>
+    <link rel="stylesheet" href="index.css" />
+  </head>
 
-<body>
-  <h3>
-    <a href="/index.html">Swivel Examples</a>
-  </h3>
-  
-  <h1>Multibar Chart Example</h1>
+  <body>
+    <h3>
+      <a href="/index.html">Swivel Examples</a>
+    </h3>
 
-  <p>Total yards for NFC teams for the 2010-2014 seasons.</p>
+    <h1>Multibar Chart Example</h1>
 
-  <div id="chart">
-    <svg style="height:500px; width:95%;"></svg>
-  </div>
+    <p>Total yards for NFC teams for the 2010-2014 seasons.</p>
 
-  <h2>Sample Code</h2>
+    <div id="chart">
+      <svg style="height:500px; width:95%;"></svg>
+    </div>
 
-  <script src="https://gist.github.com/besquared/fee89ed75cad7d34e11b.js"></script>
+    <h2>Sample Code</h2>
 
-  <script type="text/javascript">
-    datasets.nfl(function(dataset) {
-      var pivot = swivel(dataset.content)
-        .fields('team', 'season').pivots('season')
-        .select(swivel.sum('yards'), 'Total Yards')
-        .where(function(row) { return row['season'] >= 2010 && row['season'] < 2014; })
-        .where(function(row) { return ['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0; })
-        .all();
+    <script src="https://gist.github.com/besquared/fee89ed75cad7d34e11b.js"></script>
 
-      nv.addGraph(function() {
-        var chart = nv.models.multiBarChart()
-          .margin({left: 100})
-          .showLegend(true)
-          .showYAxis(true)
-          .showXAxis(true);
+    <script type="text/javascript">
+      datasets.nfl(function(dataset) {
+        var pivot = swivel(dataset.content)
+          .fields('team', 'season').pivots('season')
+          .select(swivel.sum('yards'), 'Total Yards')
+          .where(function(row) { return row['season'] >= 2010 && row['season'] < 2014; })
+          .where(function(row) { return ['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0; })
+          .all();
 
-        chart.xAxis
-          .axisLabel('Team');
+        nv.addGraph(function() {
+          var chart = nv.models.multiBarChart()
+            .margin({left: 100})
+            .showLegend(true)
+            .showYAxis(true)
+            .showXAxis(true);
 
-        chart.yAxis
-          .axisLabel('Total Yards')
-          .tickFormat(d3.format('.0f'));
+          chart.xAxis
+            .axisLabel('Team');
 
-        // Getting Data Together
+          chart.yAxis
+            .axisLabel('Total Yards')
+            .tickFormat(d3.format('.0f'));
 
-        var data        = [];
-        var axisName    = 'team';
-        var seriesNames = pivot.values('season');
+          // Getting Data Together
 
-        // Initialize Series
-        for(var s = 0; s < seriesNames.length; s++) {
-          data.push({ key: seriesNames[s], values: [] });
-        }
+          var data        = [];
+          var axisName    = 'team';
+          var seriesNames = pivot.values('season');
 
-        // Populate Series
-        for(var p = 0; p < pivot.data.length; p++) {
-          var row = pivot.data[p];
-
+          // Initialize Series
           for(var s = 0; s < seriesNames.length; s++) {
-            data[s].values.push({
-              x: row[axisName],
-              y: row[seriesNames[s]],
-              label: row[axisName]
-            });
+            data.push({ key: seriesNames[s], values: [] });
           }
-        }
 
-        // End Getting Data Together
+          // Populate Series
+          for(var p = 0; p < pivot.data.length; p++) {
+            var row = pivot.data[p];
 
-        d3.select('#chart svg').datum(data).call(chart);
+            for(var s = 0; s < seriesNames.length; s++) {
+              data[s].values.push({
+                x: row[axisName],
+                y: row[seriesNames[s]],
+                label: row[axisName]
+              });
+            }
+          }
 
-        nv.utils.windowResize(chart.update);
+          // End Getting Data Together
 
-        return chart;
+          d3.select('#chart svg').datum(data).call(chart);
+
+          nv.utils.windowResize(chart.update);
+
+          return chart;
+        });
       });
-    });
-  </script>
-</body>
+    </script>
+  </body>
 </html>
