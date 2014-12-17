@@ -133,7 +133,7 @@
         }
 
         datasets.events(function(dataset) {
-          $scope.pivot = swivel.data(dataset);
+          $scope.pivot = swivel(dataset);
 
           renderTable();
         });

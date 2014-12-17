@@ -25,8 +25,7 @@
 
 <pre class="prettyprint">
 datasets.nfl(function(dataset) {
-  var pivot = swivel
-    .data(dataset.content)
+  var pivot = swivel(dataset.content)
     .fields('season', 'team').pivots('team')
     .select(swivel.sum('yards'), 'Total Yards')
     .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
@@ -81,8 +80,7 @@ datasets.nfl(function(dataset) {
 
     <script type="text/javascript">
       datasets.nfl(function(dataset) {
-        var pivot = swivel
-          .data(dataset.content)
+        var pivot = swivel(dataset.content)
           .fields('season', 'team').pivots('team')
           .select(swivel.sum('yards'), 'Total Yards')
           .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
