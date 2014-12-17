@@ -1,21 +1,36 @@
-<html>
+<html ng-app="LineChart">
   <head>
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
 
+    <!-- NVD3 -->
     <script src="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.js"></script>
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/nvd3/1.1.15-beta/nv.d3.min.css" />
 
+    <!-- Chosen  -->
+    <script src="chosen/chosen.jquery.js"></script>
+    <link rel="stylesheet" href="chosen/chosen.min.css" />
+    <script src="angular-chosen-localytics/chosen.js"></script>
+
+    <!-- Swivel -->
     <script src="swivel.js"></script>
 
+    <!-- Specific -->
     <script src="index.js"></script>
     <link rel="stylesheet" href="index.css" />
   </head>
 
-  <body>
+  <body ng-controller="LineChartController">
     <h1>Line Chart Example</h1>
 
-    <p>Total yards by season for each team in the NFL during the 2000 to 2013 seasons.</p>
+    <p>Total yards by season during the 2000 to 2013 seasons.</p>
+
+    <div>
+      <select chosen multiple id="teams" style="width:250px;"
+        ng-model="teams" ng-options="t for t in allTeams"></select>
+    </div>
+
 
     <div id="chart">
       <svg style="height:500px; width:95%;"></svg>
@@ -23,114 +38,97 @@
 
     <h2>Sample Code</h2>
 
-<pre class="prettyprint">
-datasets.nfl(function(dataset) {
-  var pivot = swivel(dataset.content)
-    .fields('season', 'team').pivots('team')
-    .select(swivel.sum('yards'), 'Total Yards')
-    .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
-    .all();
-
-  nv.addGraph(function() {
-    var chart = nv.models.lineChart()
-      .margin({left: 100})
-      .showLegend(true)
-      .showYAxis(true)
-      .showXAxis(true);
-
-    chart.xAxis
-      .axisLabel('Season');
-
-    chart.yAxis
-      .axisLabel('Total Yards')
-      .tickFormat(d3.format('.0f'));
-
-    // Getting Data Together
-
-    var data        = [];
-    var axisName    = 'season';
-    var seriesNames = pivot.values('team');
-
-    // Initialize Series
-    for(var s = 0; s < seriesNames.length; s++) {
-      data.push({ key: seriesNames[s], values: [] });
-    }
-
-    // Populate Series
-    for(var p = 0; p < pivot.data.length; p++) {
-      var row = pivot.data[p];
-
-      for(var s = 0; s < seriesNames.length; s++) {
-        data[s].values.push({
-          x: row[axisName],
-          y: row[seriesNames[s]],
-          label: row[axisName]
-        });
-      }
-    }
-
-    // End Getting Data Together
-
-    d3.select('#chart svg').datum(data).call(chart);
-
-    return chart;
-  });
-});
-</pre>
-
     <script type="text/javascript">
-      datasets.nfl(function(dataset) {
-        var pivot = swivel(dataset.content)
-          .fields('season', 'team').pivots('team')
-          .select(swivel.sum('yards'), 'Total Yards')
-          .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
-          .all();
+      var app = angular.module("LineChart", ['localytics.directives']);
 
-        nv.addGraph(function() {
-          var chart = nv.models.lineChart()
-            .margin({left: 100})
-            .showLegend(true)
-            .showYAxis(true)
-            .showXAxis(true);
+      app.controller("LineChartController", ['$scope', '$q', function($scope, $q) {
 
-          chart.xAxis
-            .axisLabel('Season');
+        $scope.dataset;
+        $scope.teams = [];
+        $scope.allTeams = [];
 
-          chart.yAxis
-            .axisLabel('Total Yards')
-            .tickFormat(d3.format('.0f'));
+        function redraw() {
+          var teams = {};
 
-          // Getting Data Together
-
-          var data        = [];
-          var axisName    = 'season';
-          var seriesNames = pivot.values('team');
-
-          // Initialize Series
-          for(var s = 0; s < seriesNames.length; s++) {
-            data.push({ key: seriesNames[s], values: [] });
+          for(var i = 0; i < $scope.dataset.length; i++) {
+            teams[$scope.dataset[i]['team']] = true;
           }
 
-          // Populate Series
-          for(var p = 0; p < pivot.data.length; p++) {
-            var row = pivot.data[p];
+          $scope.allTeams = Object.keys(teams).sort();
 
+          var pivot = swivel($scope.dataset)
+            .fields('season', 'team').pivots('team')
+            .select(swivel.sum('yards'), 'Total Yards')
+            .where(function(row) { return row['season'] >= 2000 && row['season'] < 2014; })
+            .where(function(row) { return $scope.teams.indexOf(row['team']) >= 0; })
+            .all();
+
+          nv.addGraph(function() {
+            var chart = nv.models.lineChart()
+              .margin({left: 100})
+              .showLegend(true)
+              .showYAxis(true)
+              .showXAxis(true);
+
+            chart.xAxis
+              .axisLabel('Season');
+
+            chart.yAxis
+              .axisLabel('Total Yards')
+              .tickFormat(d3.format('.0f'));
+
+            // Getting Data Together
+
+            var data        = [];
+            var axisName    = 'season';
+            var seriesNames = pivot.values('team');
+
+            // Initialize Series
             for(var s = 0; s < seriesNames.length; s++) {
-              data[s].values.push({
-                x: row[axisName],
-                y: row[seriesNames[s]],
-                label: row[axisName]
-              });
+              data.push({ key: seriesNames[s], values: [] });
             }
+
+            // Populate Series
+            for(var p = 0; p < pivot.data.length; p++) {
+              var row = pivot.data[p];
+
+              for(var s = 0; s < seriesNames.length; s++) {
+                data[s].values.push({
+                  x: row[axisName],
+                  y: row[seriesNames[s]],
+                  label: row[axisName]
+                });
+              }
+            }
+
+            // End Getting Data Together
+
+            d3.select('#chart svg').datum(data).call(chart);
+
+            nv.utils.windowResize(chart.update);
+
+            return chart;
+          });
+        };
+
+        $scope.$watch('teams', function(value, oldValue) {
+          if(angular.isDefined(value) && oldValue !== value) {
+            redraw();
           }
-
-          // End Getting Data Together
-
-          d3.select('#chart svg').datum(data).call(chart);
-
-          return chart;
         });
-      });
+
+        $scope.$watch('dataset', function(value, oldValue) {
+          if(angular.isDefined(value) && oldValue !== value) {
+            redraw();
+          }
+        });
+
+        datasets.nfl(function(dataset) {
+          $scope.$apply(function() {
+            $scope.dataset = dataset.content;
+          });
+        });
+      }]);
     </script>
   </body>
 </html>

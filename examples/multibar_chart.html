@@ -15,7 +15,7 @@
 <body>
   <h1>Multibar Chart Example</h1>
 
-  <p>Total yards by season for each team in the NFL during the 2000 to 2013 seasons.</p>
+  <p>Total yards for NFC teams for the 2010-2014 seasons.</p>
 
   <div id="chart">
     <svg style="height:500px; width:95%;"></svg>
@@ -40,7 +40,7 @@ datasets.nfl(function(dataset) {
       .showXAxis(true);
 
     chart.xAxis
-      .axisLabel('Season');
+      .axisLabel('Team');
 
     chart.yAxis
       .axisLabel('Total Yards')
@@ -74,6 +74,8 @@ datasets.nfl(function(dataset) {
 
     d3.select('#chart svg').datum(data).call(chart);
 
+    nv.utils.windowResize(chart.update);
+
     return chart;
   });
 });
@@ -96,7 +98,7 @@ datasets.nfl(function(dataset) {
           .showXAxis(true);
 
         chart.xAxis
-          .axisLabel('Season');
+          .axisLabel('Team');
 
         chart.yAxis
           .axisLabel('Total Yards')
@@ -129,6 +131,8 @@ datasets.nfl(function(dataset) {
         // End Getting Data Together
 
         d3.select('#chart svg').datum(data).call(chart);
+
+        nv.utils.windowResize(chart.update);
 
         return chart;
       });

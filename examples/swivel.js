@@ -165,16 +165,24 @@ swivel.traveler = function(tree, map) {
 
     var result = {
       values: function(fieldName) {
-        return Object.keys(tree.getValues(fieldName));
+        if(tree.length == 0) {
+          return [];
+        } else {
+          return Object.keys(tree.getValues(fieldName));
+        }
       }
     };
 
     // this isn't right, should be if the *first* field is a row
 
-    if(map.getFieldByIndex(0).isRow()) {
-      result['data'] = visitRows(tree.getRoot(), 0);
+    if(tree.length == 0) {
+      result['data'] = [];
     } else {
-      result['data'] = visitColumn(tree.getRoot(), 0);
+      if(map.getFieldByIndex(0).isRow()) {
+        result['data'] = visitRows(tree.getRoot(), 0);
+      } else {
+        result['data'] = visitColumn(tree.getRoot(), 0);
+      }
     }
 
     return result;
@@ -292,10 +300,12 @@ swivel.traveler = function(tree, map) {
 };
 
 swivel.tree = function(fields) {
+  var length = 0;
   var root   = {};
   var values = {};
 
   var _tree = {
+    length: length,
     insert: insert,
     getRoot: getRoot,
     getValues: getValues,
@@ -313,6 +323,7 @@ swivel.tree = function(fields) {
   };
 
   function insert(row, rowIdx) {
+    length += 1;
     insertOne(root, row, rowIdx, fields, 0);
   };
 

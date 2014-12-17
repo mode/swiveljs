@@ -1,8 +1,10 @@
 swivel.tree = function(fields) {
+  var length = 0;
   var root   = {};
   var values = {};
 
   var _tree = {
+    length: length,
     insert: insert,
     getRoot: getRoot,
     getValues: getValues,
@@ -20,6 +22,7 @@ swivel.tree = function(fields) {
   };
 
   function insert(row, rowIdx) {
+    length += 1;
     insertOne(root, row, rowIdx, fields, 0);
   };
 
