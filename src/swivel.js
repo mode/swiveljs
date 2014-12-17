@@ -14,6 +14,8 @@ function swivel(rows) {
 
   function data(rows) {
     _data = _data.concat(rows);
+
+    return this;
   };
 
   function fields() {

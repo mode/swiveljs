@@ -3,6 +3,15 @@ var should = require('should');
 eval(require('fs').readFileSync('./test/test_helper.js', 'utf8'));
 
 describe("Swivel", function () {
+  it("passing an empty dataset", function() {
+    var results = swivel([])
+      .fields(['user'])
+      .select(swivel.sum('events'), 'events')
+      .all();
+
+    results.data.length.should == 0;
+  });
+
   it("passing data in constructor", function() {
     datasets.events(function(data) {
       var results = swivel(data)
