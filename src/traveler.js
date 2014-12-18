@@ -1,8 +1,8 @@
 swivel.traveler = function(tree, map) {
-  var rows   = [];
-  var path   = [];
-  var aggs   = [];
-  var wheres = [];
+  var rows    = [];
+  var path    = [];
+  var aggs    = [];
+  var filters = [];
 
   // Return Object
   var _traveler = {
@@ -10,7 +10,7 @@ swivel.traveler = function(tree, map) {
     data: data,
     group: group,
     pivot: pivot,
-    where: where,
+    filter: filter,
     aggregate: aggregate,
     count: count,
     countUnique: countUnique,
@@ -50,9 +50,9 @@ swivel.traveler = function(tree, map) {
     return this;
   };
 
-  function where(expr) {
+  function filter(expr) {
     // not good enough, we need to keep the expression
-    wheres.push(Function("row", "return " + expr + ";"));
+    filters.push(Function("row", "return " + expr + ";"));
 
     return this;
   };
@@ -129,8 +129,8 @@ swivel.traveler = function(tree, map) {
       var row = rows[rowIdx];
 
       var included = true;
-      for(var i = 0; i < wheres.length; i++) {
-        if(wheres[i](row) == false) {
+      for(var i = 0; i < filters.length; i++) {
+        if(filters[i](row) == false) {
           included = false;
           break;
         }

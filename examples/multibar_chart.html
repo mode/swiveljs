@@ -34,8 +34,8 @@
         var pivot = swivel(dataset.content)
           .group('team').pivot('season')
           .sum('yards', {'as': 'Total Yards'})
-          .where("row['season'] >= 2010 && row['season'] < 2014")
-          .where("['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0")
+          .filter("row['season'] >= 2010 && row['season'] < 2014")
+          .filter("['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0")
           .all();
 
         nv.addGraph(function() {
