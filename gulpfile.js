@@ -26,6 +26,15 @@ gulp.task('build', function() {
     .pipe(gulp.dest(examples));
 });
 
+gulp.task('build:min', function() {
+  gulp.src('src/**/*.js')
+    .pipe(concat('swivel.min.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest(dist))
+    .pipe(filesize())
+    .pipe(gulp.dest(examples));
+});
+
 gulp.task('clean', function () {
   return gulp.src(dist, {read: false})
     .pipe(clean());
