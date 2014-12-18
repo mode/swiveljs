@@ -71,11 +71,14 @@
           }
 
           $scope.allTeams = Object.keys(teams).sort();
+          var teamFilter = "['" + $scope.teams.join("','") + "']";
 
           var pivot = swivel($scope.dataset)
             .group('season')
             .pivot('team')
             .sum('yards', {'as': 'Total Yards'})
+            .where("row['season'] >= 2010 && row['season'] < 2014")
+            .where(teamFilter +  ".indexOf(row['team']) >= 0")
             .all();
 
           nv.addGraph(function() {

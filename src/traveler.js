@@ -1,7 +1,8 @@
 swivel.traveler = function(tree, map) {
-  var rows = [];
-  var path = [];
-  var aggs = [];
+  var rows   = [];
+  var path   = [];
+  var aggs   = [];
+  var wheres = [];
 
   // Return Object
   var _traveler = {
@@ -9,6 +10,7 @@ swivel.traveler = function(tree, map) {
     data: data,
     group: group,
     pivot: pivot,
+    where: where,
     aggregate: aggregate,
     count: count,
     countUnique: countUnique,
@@ -48,7 +50,18 @@ swivel.traveler = function(tree, map) {
     return this;
   };
 
+  function where(expr) {
+    // not good enough, we need to keep the expression
+    wheres.push(Function("row", "return " + expr + ";"));
+
+    return this;
+  };
+
   function aggregate(type, field, opts) {
+    if(typeof opts === 'undefined') {
+      opts = {};
+    }
+
     aggs.push({
       'as': opts['as'] || field,
       'callback': swivel.aggregate(type, field, opts)
@@ -79,14 +92,6 @@ swivel.traveler = function(tree, map) {
 
   function stdDev(field, opts) {
     return aggregate.call(this, 'stdDev', field, opts);
-  };
-
-  // get rid of filters?
-  // should we provide some utility?
-  function where(whereFn) {
-    wheres.push(whereFn);
-
-    return this;
   };
 
   function all() {
@@ -123,17 +128,17 @@ swivel.traveler = function(tree, map) {
     for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
       var row = rows[rowIdx];
 
-      // var included = true;
-      // for(var i = 0; i < wheres.length; i++) {
-      //   if(wheres[i](row) == false) {
-      //     included = false;
-      //     break;
-      //   }
-      // }
-      //
-      // if(included) {
+      var included = true;
+      for(var i = 0; i < wheres.length; i++) {
+        if(wheres[i](row) == false) {
+          included = false;
+          break;
+        }
+      }
+
+      if(included) {
         tree.insert(row, rowIdx);
-      // }
+      }
     }
   }
 
@@ -153,7 +158,8 @@ swivel.traveler = function(tree, map) {
 
     var values  = {};
     for(var i = 0; i < aggs.length; i++) {
-      values[aggs[i]['as']] = aggs[i]['callback'](nodeRows);
+      var agg = aggs[i];
+      values[agg['as']] = agg['callback'](nodeRows);
     }
 
     return values;

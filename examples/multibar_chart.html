@@ -32,10 +32,10 @@
     <script type="text/javascript">
       datasets.nfl(function(dataset) {
         var pivot = swivel(dataset.content)
-          .fields('team', 'season').pivots('season')
-          .select(swivel.sum('yards'), 'Total Yards')
-          .where(function(row) { return row['season'] >= 2010 && row['season'] < 2014; })
-          .where(function(row) { return ['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0; })
+          .group('team').pivot('season')
+          .sum('yards', {'as': 'Total Yards'})
+          .where("row['season'] >= 2010 && row['season'] < 2014")
+          .where("['ARI', 'SEA', 'SFO', 'STL'].indexOf(row['team']) >= 0")
           .all();
 
         nv.addGraph(function() {

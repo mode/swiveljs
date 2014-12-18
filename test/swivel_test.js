@@ -5,8 +5,8 @@ eval(require('fs').readFileSync('./test/test_helper.js', 'utf8'));
 describe("Swivel", function () {
   it("passing an empty dataset", function() {
     var results = swivel([])
-      .fields(['user'])
-      .select(swivel.sum('events'), 'events')
+      .group('user')
+      .sum('events')
       .all();
 
     results.data.length.should == 0;
@@ -15,8 +15,8 @@ describe("Swivel", function () {
   it("passing data in constructor", function() {
     datasets.events(function(data) {
       var results = swivel(data)
-        .fields(['user'])
-        .select(swivel.sum('events'), 'events')
+        .group('user')
+        .sum('events')
         .all();
 
       should(results.data).eql([
@@ -32,8 +32,8 @@ describe("Swivel", function () {
     datasets.events(function(data) {
       var results = swivel()
         .data(data)
-        .fields(['user'])
-        .select(swivel.sum('events'), 'events')
+        .group('user')
+        .sum('events')
         .all();
 
       should(results.data).eql([

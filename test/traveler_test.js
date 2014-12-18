@@ -5,13 +5,12 @@ eval(require('fs').readFileSync('./test/test_helper.js', 'utf8'));
 describe("Traveler", function () {
   it("single field with no pivots", function() {
     datasets.events(function(data) {
-      var fields   = ['user'];
-      var map      = swivel.map(fields);
-      var tree     = swivel.tree(fields);
-      var traveler = swivel.traveler(tree, map);
+      var tree     = swivel.tree();
+      var traveler = swivel.traveler(tree);
 
       var results = traveler.data(data)
-        .select(swivel.sum('events'), 'events')
+        .group('user')
+        .sum('events')
         .all();
 
       should(results.data).eql([
@@ -25,13 +24,12 @@ describe("Traveler", function () {
 
   it("multiple field with no pivots", function() {
     datasets.events(function(data) {
-      var fields   = ['user', 'device'];
-      var map      = swivel.map(fields);
-      var tree     = swivel.tree(fields);
-      var traveler = swivel.traveler(tree, map);
+      var tree     = swivel.tree();
+      var traveler = swivel.traveler(tree);
 
       var results = traveler.data(data)
-        .select(swivel.sum('events'), 'events')
+        .group('user', 'device')
+        .sum('events')
         .all();
 
       should(results.data).eql([
@@ -45,14 +43,12 @@ describe("Traveler", function () {
 
   it("one field with one pivot", function() {
     datasets.events(function(data) {
-      var fields   = ['device'];
-      var map      = swivel.map(fields);
-      var tree     = swivel.tree(fields);
-      var traveler = swivel.traveler(tree, map);
+      var tree     = swivel.tree();
+      var traveler = swivel.traveler(tree);
 
       var results = traveler.data(data)
-        .pivots('device')
-        .select(swivel.sum('events'), 'events')
+        .pivot('device')
+        .sum('events')
         .all();
 
       should(results.data).eql({ iphone6: 4, macbookpro: 8, surface: 2 });
@@ -61,14 +57,13 @@ describe("Traveler", function () {
 
   it("multiple fields with last field pivot", function() {
     datasets.events(function(data) {
-      var fields   = ['user','device'];
-      var map      = swivel.map(fields);
-      var tree     = swivel.tree(fields);
-      var traveler = swivel.traveler(tree, map);
+      var tree     = swivel.tree();
+      var traveler = swivel.traveler(tree);
 
       var results = traveler.data(data)
-        .pivots('device')
-        .select(swivel.sum('events'), 'events')
+        .group('user')
+        .pivot('device')
+        .sum('events')
         .all();
 
       should(results.data).eql([
@@ -82,15 +77,14 @@ describe("Traveler", function () {
 
   it("multiple fields with first field pivot", function() {
     datasets.events(function(data) {
-      var fields   = ['user','device'];
-      var map      = swivel.map(fields);
-      var tree     = swivel.tree(fields);
-      var traveler = swivel.traveler(tree, map);
+      var tree     = swivel.tree();
+      var traveler = swivel.traveler(tree);
 
       var results = traveler.data(data)
-      .pivots('user')
-      .select(swivel.sum('events'), 'events')
-      .all();
+        .pivot('user')
+        .group('device')
+        .sum('events')
+        .all();
 
       should(results.data).eql({
         A: [ { device: 'iphone6', events: 4 } ],
@@ -103,14 +97,12 @@ describe("Traveler", function () {
 
   it("multiple fields with all fields pivotted", function() {
     datasets.events(function(data) {
-      var fields   = ['user','device'];
-      var map      = swivel.map(fields);
-      var tree     = swivel.tree(fields);
-      var traveler = swivel.traveler(tree, map);
+      var tree     = swivel.tree();
+      var traveler = swivel.traveler(tree);
 
       var results = traveler.data(data)
-      .pivots('user', 'device')
-      .select(swivel.sum('events'), 'events')
+      .pivot('user', 'device')
+      .sum('events')
       .all();
 
       should(results.data).eql({
@@ -124,14 +116,14 @@ describe("Traveler", function () {
 
   it("multiple fields with center field pivot", function() {
     datasets.events(function(data) {
-      var fields   = ['user','device', 'event_name'];
-      var map      = swivel.map(fields);
-      var tree     = swivel.tree(fields);
-      var traveler = swivel.traveler(tree, map);
+      var tree     = swivel.tree();
+      var traveler = swivel.traveler(tree);
 
       var results = traveler.data(data)
+        .group('user')
         .pivots('device')
-        .select(swivel.sum('events'), 'events')
+        .group('event_name')
+        .sum('events')
         .all();
 
       should(results.data).eql([

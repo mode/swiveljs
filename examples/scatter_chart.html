@@ -32,9 +32,9 @@
     <script type="text/javascript">
       datasets.nfl(function(dataset) {
         var pivot = swivel(dataset.content)
-          .fields('team', 'quarter').pivots('quarter')
-          .select(swivel.sum('yards'),   'Total Yards')
-          .select(swivel.average('age'), 'Average Age')
+          .group('team').pivot('quarter')
+          .sum('yards', { 'as': 'Total Yards' })
+          .average('age', {'as': 'Average Age'})
           .all();
 
         nv.addGraph(function() {

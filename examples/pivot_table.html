@@ -16,7 +16,7 @@
     <h3>
       <a href="/index.html">Swivel Examples</a>
     </h3>
-    
+
     <h1>Pivot Table Example</h1>
     <p>Total events by day for each location</p>
 
@@ -74,8 +74,7 @@
       var app = angular.module("PivotTable", []);
 
       app.controller("PivotTableController", ['$scope', function($scope) {
-        $scope.pivot;
-
+        $scope.data;
         $scope.rows       = 'day';
         $scope.columns    = 'location';
         $scope.valueFn    = 'sum';
@@ -85,10 +84,10 @@
         var dateParser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
 
         var renderTable = function() {
-          var pivotted = $scope.pivot
-            .fields($scope.rows, $scope.columns)
-            .pivots($scope.columns)
-            .select(swivel.aggregate($scope.valueFn, $scope.valueField), $scope.valueField)
+          var pivotted = swivel($scope.data)
+            .group($scope.rows)
+            .pivot($scope.columns)
+            .aggregate($scope.valueFn, $scope.valueField)
             .all();
 
           var sortedData = pivotted.data.sort(function(r1, r2) {
@@ -128,6 +127,7 @@
           .selectAll("td")
             .data(function(row) {
               var values = [row[$scope.rows]];
+
               for(var i = 0; i < columnValues.length; i++) {
                 values.push(row[columnValues[i]]);
               }
@@ -137,8 +137,7 @@
         }
 
         datasets.events(function(dataset) {
-          $scope.pivot = swivel(dataset);
-
+          $scope.data = dataset;
           renderTable();
         });
 
