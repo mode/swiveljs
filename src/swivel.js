@@ -31,21 +31,27 @@ function swivel(initData) {
   };
 
   function config(config) {
-    var configFields = config['fields'];
-    var configFilters = config['filters'];
-    var configAggregates = config['aggregates'];
+    var cFields = config['fields'];
+    var cTransforms = config['transforms'];
+    var cAggregates = config['aggregates'];
 
-    for(var i = 0; i < configFields.length; i++) {
-      var f = configFields[i];
+    for(var i = 0; i < cFields.length; i++) {
+      var f = cFields[i];
+
       this[f['type']](f['name']);
     }
 
-    for(var i = 0; i < configFilters.length; i++) {
-      filter(configFilters[i]['test']);
+    for(var i = 0; i < cTransforms.length; i++) {
+      var t = cTransforms[i];
+
+      if(t['type'] == 'filter') {
+        filter(t['test']);
+      }
     }
 
-    for(var i = 0; i < configAggregates.length; i++) {
-      var a = configAggregates[i];
+    for(var i = 0; i < cAggregates.length; i++) {
+      var a = cAggregates[i];
+
       aggregate(a['type'], a['field'], { 'as': a['as'] });
     }
 

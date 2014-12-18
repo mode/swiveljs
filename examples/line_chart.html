@@ -79,9 +79,9 @@
               { type: 'pivot', name: 'team' }
             ],
 
-            filters: [
-              { test: filteredTeams +  ".indexOf(row['team']) >= 0"},
-              { test: "row['season'] >= 2010 && row['season'] < 2014" }
+            transforms: [
+              { type: 'filter', test: filteredTeams +  ".indexOf(row['team']) >= 0"},
+              { type: 'filter', test: "row['season'] >= 2010 && row['season'] < 2014" }
             ],
 
             aggregates: [
