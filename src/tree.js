@@ -1,8 +1,8 @@
 swivel.tree = function() {
-  var length = 0;
   var root   = {};
   var values = {};
   var fields = [];
+  var empty  = true;
 
   var _tree = {
     field: field,
@@ -21,7 +21,7 @@ swivel.tree = function() {
   };
 
   function isEmpty() {
-    return length == 0;
+    return empty;
   };
 
   function getRoot() {
@@ -33,7 +33,7 @@ swivel.tree = function() {
   };
 
   function insert(row, rowIdx) {
-    length += 1;
+    empty = false;
     insertOne(root, row, rowIdx, fields, 0);
   };
 

@@ -73,14 +73,6 @@
           $scope.allTeams = Object.keys(teams).sort();
           var filteredTeams = "['" + $scope.teams.join("','") + "']";
 
-          var pivot = swivel($scope.dataset)
-            .group('season')
-            .pivot('team')
-            .sum('yards', {'as': 'Total Yards'})
-            .filter(filteredTeams +  ".indexOf(row['team']) >= 0")
-            .filter("row['season'] >= 2010 && row['season'] < 2014")
-            .all();
-
           var config = {
             fields: [
               { type: 'group', name: 'season' },
@@ -93,11 +85,11 @@
             ],
 
             aggregates: [
-              { type: 'sum', name: 'yards', as: 'Total Yards' }
+              { type: 'sum', field: 'yards', as: 'Total Yards' }
             ]
           };
 
-          // console.log(config);
+          var pivot = swivel($scope.dataset).config(config).all();
 
           nv.addGraph(function() {
             var chart = nv.models.lineChart()

@@ -1,27 +1,18 @@
-function swivel(rows) {
-  var tree     = swivel.tree();
-  var traveler = swivel.traveler(tree);
-
-  if(typeof rows !== 'undefined') {
-    traveler.data(rows);
-  }
-
-  return traveler;
-};
-
-swivel.traveler = function(tree, map) {
-  var rows    = [];
+function swivel(initData) {
   var path    = [];
   var aggs    = [];
   var filters = [];
+  var tree    = swivel.tree();
+  var data    = initData || [];
 
   // Return Object
-  var _traveler = {
+  var _swivel = {
     all: all,
-    data: data,
     group: group,
     pivot: pivot,
     filter: filter,
+    config: config,
+    concat: concat,
     aggregate: aggregate,
     count: count,
     countUnique: countUnique,
@@ -33,8 +24,30 @@ swivel.traveler = function(tree, map) {
 
   // Public
 
-  function data(newRows) {
-    rows = rows.concat(newRows);
+  function concat(rows) {
+    data = data.concat(rows);
+
+    return this;
+  };
+
+  function config(config) {
+    var configFields = config['fields'];
+    var configFilters = config['filters'];
+    var configAggregates = config['aggregates'];
+
+    for(var i = 0; i < configFields.length; i++) {
+      var f = configFields[i];
+      this[f['type']](f['name']);
+    }
+
+    for(var i = 0; i < configFilters.length; i++) {
+      filter(configFilters[i]['test']);
+    }
+
+    for(var i = 0; i < configAggregates.length; i++) {
+      var a = configAggregates[i];
+      aggregate(a['type'], a['field'], { 'as': a['as'] });
+    }
 
     return this;
   };
@@ -62,7 +75,6 @@ swivel.traveler = function(tree, map) {
   };
 
   function filter(expr) {
-    // not good enough, we need to keep the expression
     filters.push(Function("row", "return " + expr + ";"));
 
     return this;
@@ -136,8 +148,8 @@ swivel.traveler = function(tree, map) {
   // Private
 
   function insertAll() {
-    for(var rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-      var row = rows[rowIdx];
+    for(var rowIdx = 0; rowIdx < data.length; rowIdx++) {
+      var row = data[rowIdx];
 
       var included = true;
       for(var i = 0; i < filters.length; i++) {
@@ -164,7 +176,7 @@ swivel.traveler = function(tree, map) {
   function visitValues(node) {
     var nodeRows = [];
     for(var i = 0; i < node.length; i++) {
-      nodeRows.push(rows[node[i]]);
+      nodeRows.push(data[node[i]]);
     }
 
     var values  = {};
@@ -245,14 +257,15 @@ swivel.traveler = function(tree, map) {
     return row;
   };
 
-  return _traveler;
+
+  return _swivel;
 };
 
 swivel.tree = function() {
-  var length = 0;
   var root   = {};
   var values = {};
   var fields = [];
+  var empty  = true;
 
   var _tree = {
     field: field,
@@ -271,7 +284,7 @@ swivel.tree = function() {
   };
 
   function isEmpty() {
-    return length == 0;
+    return empty;
   };
 
   function getRoot() {
@@ -283,7 +296,7 @@ swivel.tree = function() {
   };
 
   function insert(row, rowIdx) {
-    length += 1;
+    empty = false;
     insertOne(root, row, rowIdx, fields, 0);
   };
 

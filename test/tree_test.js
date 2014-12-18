@@ -5,11 +5,17 @@ eval(require('fs').readFileSync('./test/test_helper.js', 'utf8'));
 describe("Tree", function () {
   it("#getValues", function() {
     datasets.events(function(data) {
-      var tree = swivel.tree(['user', 'event_name', 'device'])
+      var tree = swivel.tree();
+
+      tree.field('user');
+      tree.field('event_name');
+      tree.field('device');
 
       for(var i = 0; i < data.length; i++) {
         tree.insert(data[i], i);
       }
+
+      tree.isEmpty().should.eql(false);
 
       var users       = tree.getValues('user');
       var devices     = tree.getValues('device');
@@ -32,17 +38,22 @@ describe("Tree", function () {
     });
   });
 
-  it("#eachGroup", function() {
+  it("#eachBranch", function() {
     datasets.events(function(data) {
-      var fields = ['user', 'event_name', 'device'];
+      var tree = swivel.tree()
 
-      var tree = swivel.tree(fields)
+      tree.field('user');
+      tree.field('event_name');
+      tree.field('device');
+
       for(var i = 0; i < data.length; i++) {
         tree.insert(data[i], i);
       }
 
+      should(tree.isEmpty()).eql(false);
+
       // Generated from the CSV file
-      
+
       var branches = [
         { user: 'A', event_name: 'signup', device: 'iphone6' },
         { user: 'A', event_name: 'login', device: 'iphone6' },
@@ -58,7 +69,7 @@ describe("Tree", function () {
 
       var branchCount = 0;
       var root = tree.getRoot();
-      tree.eachGroup({}, root, fields, 0, function(node, branch) {
+      tree.eachBranch({}, root, ['user', 'event_name', 'device'], 0, function(node, branch) {
         should(branches[branchCount++]).eql(branch);
       });
     });
