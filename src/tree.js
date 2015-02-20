@@ -29,7 +29,11 @@ swivel.tree = function() {
   };
 
   function getValues(fieldName) {
-    return values[fieldName];
+    if(typeof values[fieldName] === 'undefined') {
+      return [];
+    } else {
+      return values[fieldName];
+    }
   };
 
   function insert(row, rowIdx) {

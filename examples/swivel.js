@@ -31,9 +31,23 @@ function swivel(initData) {
   };
 
   function config(config) {
-    var cFields = config['fields'];
-    var cTransforms = config['transforms'];
-    var cAggregates = config['aggregates'];
+    if(typeof config['fields'] === 'undefined') {
+      var cFields = [];
+    } else {
+      var cFields = config['fields'];
+    }
+
+    if(typeof config['transforms'] === 'undefined') {
+      var cTransforms = [];
+    } else {
+      var cTransforms = config['transforms'];
+    }
+
+    if(typeof config['aggregates'] === 'undefined') {
+      var cAggregates = [];
+    } else {
+      var cAggregates = config['aggregates'];
+    }
 
     for(var i = 0; i < cFields.length; i++) {
       var f = cFields[i];
@@ -298,7 +312,11 @@ swivel.tree = function() {
   };
 
   function getValues(fieldName) {
-    return values[fieldName];
+    if(typeof values[fieldName] === 'undefined') {
+      return [];
+    } else {
+      return values[fieldName];
+    }
   };
 
   function insert(row, rowIdx) {
