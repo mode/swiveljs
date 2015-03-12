@@ -1,7 +1,7 @@
 var fs  = require('fs');
 var csv = require('csv');
 
-eval(fs.readFileSync('./dist/swivel.js', 'utf8'));
+//eval(fs.readFileSync('./dist/swivel.js', 'utf8'));
 
 var datasets = {
   events: function(callback) {

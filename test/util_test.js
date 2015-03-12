@@ -1,6 +1,7 @@
 var should = require('should');
+var swivel = require('../dist/swivel');
 
-eval(require('fs').readFileSync('./dist/swivel.js', 'utf8'));
+//eval(require('fs').readFileSync('./dist/swivel.js', 'utf8'));
 
 describe("Utils", function () {
   it("should make array out of arguments", function() {

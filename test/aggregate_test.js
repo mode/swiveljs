@@ -1,4 +1,5 @@
 var should = require('should');
+var swivel = require('../dist/swivel');
 
 eval(require('fs').readFileSync('./test/test_helper.js', 'utf8'));
 

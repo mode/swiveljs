@@ -280,3 +280,18 @@ function swivel(initData) {
 
   return _swivel;
 };
+
+//Export to CommonJS/Node format
+if (typeof exports !== 'undefined') {
+  if (typeof module !== 'undefined' && module.exports) {
+    exports = module.exports = swivel;
+  }
+  exports.swivel = swivel;
+} else if (typeof define === 'function' && define.amd) {
+  define('swivel', function() {
+    return swivel;
+  });
+} else {
+  // no exports so attach to global
+  this['swivel'] = swivel;
+}
