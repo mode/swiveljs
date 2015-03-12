@@ -1,4 +1,5 @@
 ![status](https://travis-ci.org/mode/swiveljs.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/mode/swiveljs/badge.svg?branch=master)](https://coveralls.io/r/mode/swiveljs?branch=master)
 
 ```
 {
