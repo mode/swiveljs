@@ -1,3 +1,5 @@
+![status](https://travis-ci.org/mode/swiveljs.svg?branch=master)
+
 ```
 {
   fields: [
