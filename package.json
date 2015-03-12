@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp test:travis"
   },
   "repository": {
     "type": "git",
@@ -33,6 +33,7 @@
     "gulp-filesize": "*",
     "gulp-continuous-concat": "*",
     "gulp-connect": "*",
-    "gulp-istanbul": "*"
+    "gulp-istanbul": "*",
+    "gulp-coveralls": "*"
   }
 }

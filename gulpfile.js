@@ -8,6 +8,7 @@ var rename = require('gulp-rename');
 var filesize = require('gulp-filesize');
 var connect = require('gulp-connect');
 var istanbul = require('gulp-istanbul');
+var coveralls = require('gulp-coveralls');
 
 var dist     = 'dist';
 var examples = 'examples';
@@ -50,6 +51,20 @@ gulp.task('test', function (cb) {
         .pipe(mocha({reporter: 'nyan'}))
         .pipe(istanbul.writeReports()) // Creating the reports after tests runned
         .on('end', cb);
+    });
+});
+
+gulp.task('test:travis', function (cb) {
+  gulp.src(['./dist/swivel.js'])
+    .pipe(istanbul()) // Covering files
+    .pipe(istanbul.hookRequire()) // Force `require` to return covered files
+    .on('finish', function () {
+      gulp.src(['test/*.js'])
+        .pipe(mocha({reporter: 'nyan'}))
+        .pipe(istanbul.writeReports()) // Creating the reports after tests runned
+        .on('end', cb);
+      gulp.src(['coverage/lcov-report/lcov.info'])
+        .pipe(coveralls());
     });
 });
 
