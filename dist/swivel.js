@@ -480,10 +480,10 @@ swivel.median = function(field) {
     values.sort( function(a,b) { return a - b; } );
     var midPoint = Math.floor(values.length / 2);
 
-    if(values.length % 2) {
-      value = values[midPoint];
+    if(values.length % 2 == 0) {
+      value = (values[midPoint - 1] + values[midPoint]) / 2.0;
     } else {
-      value = values[midPoint - 1] + values[midPoint] / 2.0;
+      value = values[midPoint];
     }
 
     return value;
