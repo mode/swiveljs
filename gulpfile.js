@@ -62,9 +62,11 @@ gulp.task('test:travis', function (cb) {
       gulp.src(['test/*.js'])
         .pipe(mocha({reporter: 'nyan'}))
         .pipe(istanbul.writeReports()) // Creating the reports after tests runned
-        .on('end', cb);
-      gulp.src(['coverage/lcov-report/lcov.info'])
-        .pipe(coveralls());
+        .on('end', function() {
+          gulp.src(['coverage/lcov-report/lcov.info'])
+            .pipe(coveralls());
+            cb();
+        });
     });
 });
 
