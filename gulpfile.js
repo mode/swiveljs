@@ -63,7 +63,7 @@ gulp.task('test:travis', function (cb) {
         .pipe(mocha({reporter: 'nyan'}))
         .pipe(istanbul.writeReports()) // Creating the reports after tests runned
         .on('end', function() {
-          gulp.src(['coverage/lcov-report/lcov.info'])
+          gulp.src('coverage/**/lcov.info')
             .pipe(coveralls());
             cb();
         });
