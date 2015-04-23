@@ -1,6 +1,12 @@
-swivel.join = function() {
+swivel.joins = {
+  LEFT:  'LEFT',
+  RIGHT: 'RIGHT',
+  INNER: 'INNER',
+  OUTER: 'OUTER'
+};
+
+swivel.join = function(type) {
   var conds = {};
-  var type  = swivel.join.types.LEFT;
 
   var _join = {
   };
@@ -12,8 +18,19 @@ swivel.join = function() {
   return _join;
 };
 
-swivel.join.types = {
-  LEFT:  'LEFT',
-  RIGHT: 'RIGHT',
-  INNER: 'INNER'
+// on is an array of pairs
+swivel.join.left = function(lRel, rRel, on) {
+  return swivel.join(swivel.joins.LEFT)
+};
+
+swivel.join.right = function(lRel, rRel, on) {
+  return swivel.join(swivel.joins.RIGHT);
+};
+
+swivel.join.inner = function(lRel, rRel, on) {
+  return swivel.join(swivel.joins.INNER);
+};
+
+swivel.join.outer = function(lRel, rRel, on) {
+  return swivel.join(swivel.joins.OUTER)
 };
