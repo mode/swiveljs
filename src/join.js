@@ -5,9 +5,7 @@ swivel.joins = {
   OUTER: 'OUTER'
 };
 
-swivel.join = function(type) {
-  var conds = {};
-
+swivel.join = function(type, lRel, rRel, onFields) {
   var _join = {
   };
 
@@ -18,19 +16,18 @@ swivel.join = function(type) {
   return _join;
 };
 
-// on is an array of pairs
-swivel.join.left = function(lRel, rRel, on) {
-  return swivel.join(swivel.joins.LEFT)
+swivel.join.left = function(lRel, rRel, onFields) {
+  return swivel.join(swivel.joins.LEFT, lRel, rRel, onFields)
 };
 
-swivel.join.right = function(lRel, rRel, on) {
-  return swivel.join(swivel.joins.RIGHT);
+swivel.join.right = function(lRel, rRel, onFields) {
+  return swivel.join(swivel.joins.RIGHT, lRel, rRel, onFields);
 };
 
-swivel.join.inner = function(lRel, rRel, on) {
-  return swivel.join(swivel.joins.INNER);
+swivel.join.inner = function(lRel, rRel, onFields) {
+  return swivel.join(swivel.joins.INNER, lRel, rRel, onFields);
 };
 
-swivel.join.outer = function(lRel, rRel, on) {
-  return swivel.join(swivel.joins.OUTER)
+swivel.join.outer = function(lRel, rRel, onFields) {
+  return swivel.join(swivel.joins.OUTER, lRel, rRel, onFields)
 };
