@@ -1,8 +1,8 @@
 {
   "name": "swivel",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "We pivot so you don't have to",
-  "main": "swivel.js",
+  "main": "dist/swivel.js",
   "directories": {
     "test": "test"
   },
