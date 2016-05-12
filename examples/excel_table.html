@@ -8,6 +8,8 @@
 
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
+    <script src="angular-dragdrop/src/angular-dragdrop.min.js"></script>
+
     <script src="swivel.js"></script>
 
     <script src="index.js"></script>
@@ -23,58 +25,58 @@
 
     <div id="main" class="container-fluid">
       <div class="row">
-        <div class="col-md-9">
+        <div class="col-md-8">
           <!-- Filters go here -->
           <div id="pivot-container"></div>
         </div>
 
-        <div id="excel-pivot-settings" class="col-md-3">
+        <div id="excel-pivot-settings" class="col-md-4">
 
           <span class="field-header">Fields</span>
           <div id="field-list" class="field-list">
-            <label class="field-item" ng-repeat="field in fields" for="field-{{ field.name }}">
-              <input  id="field-{{ field.name }}"  type="checkbox" ng-checked="field.selected" disabled="true"> {{ field.label }}
+            <label class="field-item" ng-repeat="field in fields" for="field-{{ field.name }}" field-item>
+              <input  id="field-{{ field.name }}" type="checkbox" ng-checked="field.selected" disabled="true"> {{ field.label }}
             </label>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-6" style="border:1px solid red;">
             <span class="field-header">Filters</span>
-            <ul class="field-list field-droppable">
+            <div class="field-list" field-list>
               <!-- filters -->
-              <span class="field-item-label field-item-filter" ng-repeat="field in fields | filter: { selection: { group: 'filters' } }">
+              <span class="field-item field-item-filter" ng-repeat="field in fields | filter: { selection: { group: 'filters' } }">
 
               </span>
-            </ul>
+            </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-6" style="border:1px solid red;">
             <span class="field-header">Colums</span>
 
-            <ul class="field-list field-droppable">
-              <span class="field-item-label field-item-column" ng-repeat="field in fields | filter: { selection: { group: 'columns' } }">
+            <div class="field-list" field-list>
+              <span class="field-item field-item-column" ng-repeat="field in fields | filter: { selection: { group: 'columns' } }">
                 {{ field.name }}
               </span>
-            </ul>
+            </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-6" style="border:1px solid red;">
             <span class="field-header">Rows</span>
 
-            <ul class="field-list field-droppable">
-              <span class="field-item-label field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'rows' } }">
+            <div class="field-list" field-list>
+              <span class="field-item field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'rows' } }">
                 {{ field.name }}
               </span>
-            </ul>
+            </div>
           </div>
 
-          <div class="col-md-6">
+          <div class="col-md-6" style="border:1px solid red;">
             <span class="field-header">Values</span>
 
-            <ul class="field-list field-droppable">
-              <span class="field-item-label field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'values' } }">
+            <div class="field-list" field-list>
+              <span class="field-item field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'values' } }">
                 {{ field.selection.valueFn }} of {{ field.name }}
               </span>
-            </ul>
+            </div>
           </div>
 
         </div>
@@ -83,7 +85,34 @@
     </div>
 
     <script type="text/javascript">
-      var app = angular.module("PivotTable", []);
+      var app = angular.module("PivotTable", ['ngDragDrop']);
+
+      app.directive('fieldItem', function() {
+        return {
+          restrict: 'A',
+          link: function(scope, element, attrs) {
+            element.draggable({
+              helper: "clone",
+              revert: "invalid"
+            });
+          }
+        }
+      });
+
+      app.directive('fieldList', function() {
+        return {
+          restrict: 'A',
+          link: function(scope, element, attrs) {
+            element.droppable({
+              accept: '.field-item',
+              drop: function(event, ui) {
+                console.log(ui.draggable)
+                element.append(angular.element(ui.draggable).clone());
+              }
+            });
+          }
+        }
+      });
 
       app.controller("PivotTableController", ['$scope', function($scope) {
         $scope.data;
@@ -91,6 +120,22 @@
         $scope.columns    = '';
         $scope.valueFn    = 'sum';
         $scope.valueField = 'events';
+
+        $scope.filterDropped = function(event, ui) {
+          console.log("Filter Dropped", ui.draggable);
+        };
+
+        $scope.columnDropped = function(event, ui) {
+          console.log("Column Dropped", ui.draggable);
+        };
+
+        $scope.rowDropped = function(event, ui) {
+          console.log("Row Dropped", ui.draggable);
+        };
+
+        $scope.valueDropped = function(event, ui) {
+          console.log("Value Dropped", ui.draggable);
+        };
 
         $scope.fields = [
           {
@@ -234,20 +279,6 @@
         });
 
       }]);
-
-      $(function() {
-        $(".field-item").draggable({
-          helper: "clone",
-          revert: "invalid"
-        });
-
-        $('.field-droppable').droppable({
-          accept: '.field-item',
-          drop: function(event, ui) {
-            $(this).append($(ui.draggable).clone());
-          }
-        });
-      });
     </script>
   </body>
 </html>

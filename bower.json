@@ -6,7 +6,7 @@
 
   "devDependencies": {
     "angular-chosen-localytics": "*",
-    "chosen": "https://github.com/harvesthq/chosen/releases/download/v1.2.0/chosen_v1.2.0.zip"
+    "chosen": "https://github.com/harvesthq/chosen/releases/download/v1.2.0/chosen_v1.2.0.zip",
   },
 
   "main": "swivel.js",
