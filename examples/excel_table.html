@@ -8,8 +8,6 @@
 
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
-    <script src="angular-dragdrop/src/angular-dragdrop.min.js"></script>
-
     <script src="swivel.js"></script>
 
     <script src="index.js"></script>
@@ -34,48 +32,48 @@
 
           <span class="field-header">Fields</span>
           <div id="field-list" class="field-list">
-            <label class="field-item" ng-repeat="field in fields" for="field-{{ field.name }}" field-item>
-              <input  id="field-{{ field.name }}" type="checkbox" ng-checked="field.selected" disabled="true"> {{ field.label }}
+            <label id="field-{{ field.name }}" class="field-item" ng-repeat="field in fields" for="field-{{ field.name }}" field-item>
+              <input type="checkbox" ng-checked="field.selected" disabled="true"> {{ field.label }}
             </label>
           </div>
 
-          <div class="col-md-6" style="border:1px solid red;">
+          <div class="col-md-6">
             <span class="field-header">Filters</span>
-            <div class="field-list" field-list>
+            <div class="field-list" field-list="filters">
               <!-- filters -->
-              <span class="field-item field-item-filter" ng-repeat="field in fields | filter: { selection: { group: 'filters' } }">
-
-              </span>
+              <div class="field-item field-item-filter" ng-repeat="field in fields | filter: { selection: { group: 'filters' } }">
+                <span id="filter-{{ field.name }}" field-item>{{ field.label }}</span>
+              </div>
             </div>
           </div>
 
-          <div class="col-md-6" style="border:1px solid red;">
+          <div class="col-md-6">
             <span class="field-header">Colums</span>
 
-            <div class="field-list" field-list>
-              <span class="field-item field-item-column" ng-repeat="field in fields | filter: { selection: { group: 'columns' } }">
-                {{ field.name }}
-              </span>
+            <div class="field-list" field-list="columns">
+              <div class="field-item field-item-column" ng-repeat="field in fields | filter: { selection: { group: 'columns' } }">
+                <span id="column-{{ field.name }}" field-item>{{ field.label }}</span>
+              </div>
             </div>
           </div>
 
-          <div class="col-md-6" style="border:1px solid red;">
+          <div class="col-md-6">
             <span class="field-header">Rows</span>
 
-            <div class="field-list" field-list>
-              <span class="field-item field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'rows' } }">
-                {{ field.name }}
-              </span>
+            <div class="field-list" field-list="rows">
+              <div class="field-item field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'rows' } }">
+                <span id="row-{{ field.name }}" field-item>{{ field.label }}</span>
+              </div>
             </div>
           </div>
 
-          <div class="col-md-6" style="border:1px solid red;">
+          <div class="col-md-6">
             <span class="field-header">Values</span>
 
-            <div class="field-list" field-list>
-              <span class="field-item field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'values' } }">
-                {{ field.selection.valueFn }} of {{ field.name }}
-              </span>
+            <div class="field-list" field-list="values">
+              <div class="field-item field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'values' } }">
+                <span id="value-{{ field.name }}" field-item>{{ field.selection.valueFn }} of {{ field.label }}</span>
+              </div>
             </div>
           </div>
 
@@ -85,7 +83,7 @@
     </div>
 
     <script type="text/javascript">
-      var app = angular.module("PivotTable", ['ngDragDrop']);
+      var app = angular.module("PivotTable", []);
 
       app.directive('fieldItem', function() {
         return {
@@ -106,8 +104,13 @@
             element.droppable({
               accept: '.field-item',
               drop: function(event, ui) {
-                console.log(ui.draggable)
-                element.append(angular.element(ui.draggable).clone());
+                var groupName = attrs['fieldList'];
+
+                var draggable = angular.element(ui.draggable)
+                var draggableId = draggable.attr('id').split('-');
+                var fieldName = draggableId[draggableId.length - 1];
+
+                scope.selectField(fieldName, groupName);
               }
             });
           }
@@ -121,21 +124,15 @@
         $scope.valueFn    = 'sum';
         $scope.valueField = 'events';
 
-        $scope.filterDropped = function(event, ui) {
-          console.log("Filter Dropped", ui.draggable);
-        };
-
-        $scope.columnDropped = function(event, ui) {
-          console.log("Column Dropped", ui.draggable);
-        };
-
-        $scope.rowDropped = function(event, ui) {
-          console.log("Row Dropped", ui.draggable);
-        };
-
-        $scope.valueDropped = function(event, ui) {
-          console.log("Value Dropped", ui.draggable);
-        };
+        $scope.selectField = function(fieldName, groupName) {
+          angular.forEach($scope.fields, function(field) {
+            if(field.name == fieldName) {
+              $scope.$apply(function() {
+                field.selection = { group: groupName };
+              })
+            }
+          })
+        }
 
         $scope.fields = [
           {
