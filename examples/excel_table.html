@@ -1,8 +1,11 @@
 <html ng-app="PivotTable">
   <head>
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.js"></script>
+
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.3/angular.min.js"></script>
+
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
 
     <script src="swivel.js"></script>
@@ -20,106 +23,60 @@
 
     <div id="main" class="container-fluid">
       <div class="row">
-        <h1>Excel Pivot Table</h1>
-        <p>Total events by day for each location</p>
-      </div>
-
-      <div class="row">
         <div class="col-md-9">
           <!-- Filters go here -->
           <div id="pivot-container"></div>
         </div>
 
-        <div id="pivot-settings" class="col-md-3">
+        <div id="excel-pivot-settings" class="col-md-3">
 
           <span class="field-header">Fields</span>
-          <div class="field-list" style="width:100%;">
-            <label ng-repeat="field in fields" for="field-{{ field.name }}" style="display:block;">
-              <input type="checkbox" selected="{{ field.selected }}" id="field-{{ field.name }}"> {{ field.label }}
+          <div id="field-list" class="field-list">
+            <label class="field-item" ng-repeat="field in fields" for="field-{{ field.name }}">
+              <input  id="field-{{ field.name }}"  type="checkbox" ng-checked="field.selected" disabled="true"> {{ field.label }}
             </label>
           </div>
 
           <div class="col-md-6">
             <span class="field-header">Filters</span>
-            <ul class="field-list">
+            <ul class="field-list field-droppable">
               <!-- filters -->
+              <span class="field-item-label field-item-filter" ng-repeat="field in fields | filter: { selection: { group: 'filters' } }">
+
+              </span>
             </ul>
           </div>
 
           <div class="col-md-6">
-            <span class="field-header">Column Labels</span>
+            <span class="field-header">Colums</span>
 
-            <ul class="field-list">
-              <!-- columns -->
+            <ul class="field-list field-droppable">
+              <span class="field-item-label field-item-column" ng-repeat="field in fields | filter: { selection: { group: 'columns' } }">
+                {{ field.name }}
+              </span>
             </ul>
           </div>
 
           <div class="col-md-6">
-            <span class="field-header">Row Labels</span>
+            <span class="field-header">Rows</span>
 
-            <ul class="field-list">
-              <!-- rows -->
+            <ul class="field-list field-droppable">
+              <span class="field-item-label field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'rows' } }">
+                {{ field.name }}
+              </span>
             </ul>
           </div>
 
           <div class="col-md-6">
             <span class="field-header">Values</span>
 
-            <ul class="field-list">
-              <!-- values -->
+            <ul class="field-list field-droppable">
+              <span class="field-item-label field-item-row" ng-repeat="field in fields | filter: { selection: { group: 'values' } }">
+                {{ field.selection.valueFn }} of {{ field.name }}
+              </span>
             </ul>
           </div>
 
-          <div class="row">
-            <form id="pivot-settings">
-              <div>
-                <div class="settings-label">Rows</div>
-
-                <select ng-model="rows">
-                  <option value="day">Day</option>
-                  <option value="user_id">User ID</option>
-                  <option value="device">Device</option>
-                  <option value="location">Location</option>
-                  <option value="event_name">Event Name</option>
-                </select>
-              </div>
-
-              <div>
-                <div class="settings-label">Columns</div>
-
-                <select ng-model="columns">
-                  <option value=""></option>
-                  <option value="day">Day</option>
-                  <option value="user_id">User ID</option>
-                  <option value="device">Device</option>
-                  <option value="location">Location</option>
-                  <option value="event_name">Event Name</option>
-                </select>
-              </div>
-
-              <div id="pivot-values">
-                <div class="settings-label">Values</div>
-
-                <select ng-model="valueField">
-                  <option value="day">Day</option>
-                  <option value="user_id">User ID</option>
-                  <option value="device">Device</option>
-                  <option value="location">Location</option>
-                  <option value="events">Events</option>
-                  <option value="events">Event Name</option>
-                </select>
-
-                <select ng-model="valueFn">
-                  <option value="sum">Sum</option>
-                  <option value="count">Count</option>
-                  <option value="countUnique">Unique</option>
-                  <option value="average">Average</option>
-                  <option value="median">Median</option>
-                  <option value="stdDev">Standard Deviation</option>
-                </select>
-              </div>
-            </form>
-          </div>
         </div>
       </div>
 
@@ -140,31 +97,48 @@
             name: 'day',
             label: 'Day',
             type: 'datetime',
-            selected: false
+            selected: true,
+            selection: {
+              group: 'rows'
+            }
           },
           {
             name: 'user_id',
             label: 'User ID',
             type: 'number',
-            selected: false
+            selected: false,
+            selection: {}
           },
           {
             name: 'device',
             label: 'Device',
             type: 'string',
-            selected: false
+            selected: false,
+            selection: {}
           },
           {
             name: 'location',
             label: 'Location',
             type: 'string',
-            selected: false
+            selected: false,
+            selection: {}
           },
           {
             name: 'event_name',
             label: 'Event Name',
             type: 'string',
-            selected: false
+            selected: false,
+            selection: {}
+          },
+          {
+            name: 'events',
+            label: 'Events',
+            type: 'number',
+            selected: true,
+            selection: {
+              group: 'values',
+              valueFn: 'sum'
+            }
           }
         ]
 
@@ -194,7 +168,7 @@
           var columnValues = pivoted.values($scope.columns).sort();
 
           d3.select("#pivot-container table").remove(); // clean out old table
-          var table = d3.select("#pivot-container").append("table"),
+          var table = d3.select("#pivot-container").append("table").attr('class', 'table'),
             thead = table.append("thead"),
             tbody = table.append("tbody");
 
@@ -260,6 +234,20 @@
         });
 
       }]);
+
+      $(function() {
+        $(".field-item").draggable({
+          helper: "clone",
+          revert: "invalid"
+        });
+
+        $('.field-droppable').droppable({
+          accept: '.field-item',
+          drop: function(event, ui) {
+            $(this).append($(ui.draggable).clone());
+          }
+        });
+      });
     </script>
   </body>
 </html>
