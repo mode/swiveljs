@@ -150,32 +150,32 @@ function swivel(initData) {
       },
 
       // Depth First Traversal
+      // What do we really want here?
+      //  this is basically the index in its natural order
       eachGroupValue: function(callback) {
         var stack = [];
 
-        stack.push({ depth: -1, node: tree.getRoot() } );
+        stack.push({ depth: -1, path: [], node: tree.getRoot() } );
 
         while(stack.length > 0) {
           var currElem = stack.pop();
           var currNode  = currElem.node;
+          var currPath  = currElem.path;
           var currDepth = currElem.depth;
 
           if(typeof(currNode) != 'undefined') {
             var pIndex = currDepth + 1;
 
             if(pIndex >= path.length) {
-              console.log(currNode);
-              // We're at the end of a branch here
-              //  the last element in our list here is an
-              //  array of data indices
+              console.log(currPath);
             } else {
               var fValues  = this.values(path[pIndex].name);
 
               for(var j = 0; j < fValues.length; j++) {
                 var fieldValue = fValues[j];
                 if(fieldValue in currNode) {
-                  console.log("Pushing", fieldValue);
-                  stack.push({ depth: pIndex, node: currNode[fieldValue] });
+                  var nextPath = currPath.slice(0).concat(fieldValue);
+                  stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
                 }
               }
             }
