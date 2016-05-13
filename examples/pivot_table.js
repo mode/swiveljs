@@ -169,7 +169,7 @@ app.controller("PivotTableController", ['$scope', function($scope) {
       var tr;
       var currNode = queue.shift();
 
-      if(lastDepth != currNode.depth) {
+      if(lastDepth < currNode.depth) {
         tr = thead.append("tr");
         lastDepth = currNode.depth;
       }
@@ -186,6 +186,9 @@ app.controller("PivotTableController", ['$scope', function($scope) {
         }
       }
     }
+
+    // Now how do we build the rows? Probably the exact same way..
+    //   is it a breadth first traversal of the the values tree?
 
     // thead.append("tr")
     //   .selectAll("td")
