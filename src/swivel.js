@@ -14,9 +14,9 @@ function swivel(initData) {
     config: config,
     concat: concat,
     aggregate: aggregate,
+    sum: sum,
     count: count,
     countUnique: countUnique,
-    sum: sum,
     average: average,
     median: median,
     stdDev: stdDev
@@ -147,6 +147,58 @@ function swivel(initData) {
         } else {
           return Object.keys(tree.getValues(fieldName));
         }
+      },
+
+      // Depth First Traversal
+      eachGroupValue: function(callback) {
+        var stack = [];
+
+        stack.push({ depth: -1, node: tree.getRoot() } );
+
+        while(stack.length > 0) {
+          var currElem = stack.pop();
+          var currNode  = currElem.node;
+          var currDepth = currElem.depth;
+
+          if(typeof(currNode) != 'undefined') {
+            var pIndex = currDepth + 1;
+
+            if(pIndex >= path.length) {
+              console.log(currNode);
+              // We're at the end of a branch here
+              //  the last element in our list here is an
+              //  array of data indices
+            } else {
+              var fValues  = this.values(path[pIndex].name);
+
+              for(var j = 0; j < fValues.length; j++) {
+                var fieldValue = fValues[j];
+                if(fieldValue in currNode) {
+                  console.log("Pushing", fieldValue);
+                  stack.push({ depth: pIndex, node: currNode[fieldValue] });
+                }
+              }
+            }
+          }
+        }
+      },
+
+      // Breadth First Traversal
+      eachPivotValue: function(callback) {
+        var queue = [tree.getRoot()];
+
+        while(queue.length > 0) {
+
+        }
+        // we could potentially call this where the depth was the pathIndex
+        //  how do we know what path index we'd need to be on?.. We'd hit a point
+        //  in the queue where the field names don't match? I think if every time
+        //  we stored something in the queue we also put what field it belonged to
+        //  then we would know how to scan for taht nodes children... that's the actual
+        //  hard part is finding the children of the element that we're poking around
+        //  at from the queue..
+
+        // in the queue put { node: ..., depth: 0 }
       }
     };
 
@@ -183,6 +235,8 @@ function swivel(initData) {
         tree.insert(row, rowIdx);
       }
     }
+
+    console.log(tree.getRoot())
   }
 
   function getPathFields() {

@@ -34,11 +34,6 @@ app.directive('fieldList', function() {
 
 app.controller("PivotTableController", ['$scope', function($scope) {
   $scope.data;
-  $scope.rows       = 'day';
-  $scope.columns    = '';
-  $scope.valueFn    = 'sum';
-  $scope.valueField = 'events';
-
   $scope.fields = [
     {
       name: 'day',
@@ -89,25 +84,57 @@ app.controller("PivotTableController", ['$scope', function($scope) {
     }
   ]
 
-  $scope.selectField = function(fieldName, groupName) {
+  var fieldsForGroup = function(groupName) {
+    var filters = [];
+
     angular.forEach($scope.fields, function(field) {
-      if(field.name == fieldName) {
-        $scope.$apply(function() {
-          field.selection = { group: groupName };
-        })
+      if(field.selection && field.selection.group == groupName) {
+        filters.push(field);
       }
-    })
+    });
+
+    return filters;
+  };
+
+  $scope.selectField = function(fieldName, groupName) {
+    $scope.$apply(function() {
+      angular.forEach($scope.fields, function(field) {
+        if(field.name == fieldName) {
+          field.selected = true;
+          field.selection = { group: groupName };
+        }
+      });
+
+      renderTable();
+    });
   }
 
   var dateFormat = d3.time.format("%Y-%m-%d");
   var dateParser = d3.time.format("%Y-%m-%dT%H:%M:%S").parse;
 
   var renderTable = function() {
-    var pivoted = swivel($scope.data)
-      .group($scope.rows)
-      .pivot($scope.columns)
-      .aggregate($scope.valueFn, $scope.valueField)
-      .all();
+    var filters = fieldsForGroup('filters');
+    var columns = fieldsForGroup('columns');
+    var rows    = fieldsForGroup('rows');
+    var values  = fieldsForGroup('values');
+
+    var pivoted = swivel($scope.data);
+
+    angular.forEach(rows, function(field) {
+      pivoted = pivoted.group(field.name);
+    });
+
+    angular.forEach(columns, function(field) {
+      pivoted = pivoted.pivot(field.name);
+    });
+
+    angular.forEach(values, function(field) {
+      pivoted = pivoted.aggregate('sum', field.name);
+    });
+
+    pivoted = pivoted.all();
+
+    console.log(pivoted);
 
     var sortedData = pivoted.data.sort(function(r1, r2) {
       var v1 = r1[$scope.rows];
@@ -122,43 +149,54 @@ app.controller("PivotTableController", ['$scope', function($scope) {
       }
     });
 
+    pivoted.eachGroupValue(function(stack) {
+      console.log("GOT A STACK!");
+    })
+
     var columnValues = pivoted.values($scope.columns).sort();
 
     d3.select("#pivot-container table").remove(); // clean out old table
+
     var table = d3.select("#pivot-container").append("table").attr('class', 'table'),
       thead = table.append("thead"),
       tbody = table.append("tbody");
 
-    thead.append("tr")
-      .selectAll("td")
-        .data(function() {
-          var columns = [$scope.rows];
-
-          if($scope.columns == '') {
-            columns.push($scope.valueField);
-          } else {
-            for(var i = 0; i < columnValues.length; i++) {
-              columns.push(columnValues[i]);
-            }
-          }
-
-          return columns;
-        }).enter().append("td")
-      .text(function(column){ return column; });
-
-    tbody.selectAll("tr")
-      .data(sortedData)
-      .enter().append("tr")
-    .selectAll("td")
-      .data(function(row) {
-        var values = [row[$scope.rows]];
-
-        for(var i = 0; i < columnValues.length; i++) {
-          values.push(row[columnValues[i]]);
-        }
-        return values;
-      }).enter().append("td")
-    .text(function(row){ return row; })
+    // thead.append("tr")
+    //   .selectAll("td")
+    //     .data(function() {
+    //       var columns = [];
+    //
+    //       for(var i = 0; i < rows.length; i++) {
+    //         columns.push(rows[i]);
+    //       }
+    //
+    //       if(columns.length == 0) {
+    //         for(var i = 0; i < values.length; i++) {
+    //           columns.push(values[i]);
+    //         }
+    //       } else {    //
+    //         for(var i = 0; i < columnValues.length; i++) {
+    //           columns.push(columnValues[i]);
+    //         }
+    //       }
+    //
+    //       return columns;
+    //     }).enter().append("td")
+    //   .text(function(column){ return column.name; });
+    //
+    // tbody.selectAll("tr")
+    //   .data(sortedData)
+    //   .enter().append("tr")
+    // .selectAll("td")
+    //   .data(function(row) {
+    //     var values = [row[$scope.rows]];
+    //
+    //     for(var i = 0; i < columnValues.length; i++) {
+    //       values.push(row[columnValues[i]]);
+    //     }
+    //     return values;
+    //   }).enter().append("td")
+    // .text(function(row){ return row; })
   }
 
   datasets.events(function(dataset) {
