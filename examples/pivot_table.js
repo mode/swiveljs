@@ -148,28 +148,32 @@ app.controller("PivotTableController", ['$scope', function($scope) {
       }
     });
 
-    // var groupValues = pivoted.groupPathValues();
-    var pivotValues = pivoted.pathValues('pivot', 'breadth');
-
-    for(pathKey in pivotValues) {
-      console.log(pivotValues[pathKey].path);
-    }
-
-    // now we just need to do a traversal of this pivotValues structure
-    //  each time we scan and cache the value in a particular position until
-    //  we see a new one and then we drop it into its position we can set the colspan
-    //  of the td that we're currently on.. once we've gotten through all the values
-    //  in that position we can go onto the next tr and so on and so on.. it's a Traversal
-    //  of a tree but in a flat orientation.. feels like another breadth first traversal
-
-    var columnValues = pivoted.values($scope.columns).sort();
-
     d3.select("#pivot-container table").remove(); // clean out old table
 
     var table = d3.select("#pivot-container").append("table").attr('class', 'table'),
       thead = table.append("thead"),
       tbody = table.append("tbody");
 
+    // oh.. we should just do this as the unique values of each field
+    var pfValues = pivoted.pivotFieldValues();
+
+    console.log(pfValues);
+
+    for(fieldPos in pfValues) {
+      var subFields = pfValues.slice(i + 1, pfValues.length - (i + 1));
+
+      var colspan = 1;
+      for(var j = 0; j < subFields.length; j++) {
+        colspan *= subFields[j].length;
+      }
+      console.log(pfValues);
+
+      var tr = thead.append("tr");
+      for(var k = 0; k < pfValues[i].length; k++) {
+        var label = pfValues[i][k];
+        tr.append("td").attr("colspan", colspan).text(label);
+      }
+    }
 
     // thead.append("tr")
     //   .selectAll("td")

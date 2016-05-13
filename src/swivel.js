@@ -140,6 +140,73 @@ function swivel(initData) {
   function all() {
     insertAll();
 
+    var allFieldValues = function(fieldName) {
+      if(tree.isEmpty()) {
+        return [];
+      } else {
+        return Object.keys(tree.getValues(fieldName));
+      }
+    };
+
+    var traverseFields = function(fieldType, tOrder, callback) {
+      var stack = [];
+
+      if(typeof(fieldType) === 'undefined')
+        fieldType = 'all'
+
+      if(typeof(tOrder) === 'undefined')
+        tOrder = 'depth'
+
+      var initStack = function() {
+        stack.push({
+          depth: -1, path: [],
+          node: tree.getRoot()
+        });
+      }
+
+      var fieldValues = {}
+      for(var i = 0; i < path.length; i++) {
+        var fieldName = path[i].name;
+        fieldValues[fieldName] = allFieldValues(fieldName).sort();
+      }
+
+      initStack();
+      while(stack.length > 0) {
+        if(tOrder === 'depth') {
+          var currElem = stack.pop();
+        } else if(tOrder === 'breadth') {
+          var currElem = stack.shift();
+        } else {
+          throw "Unknown Traversal Order " + tOrder
+        }
+
+        var currNode  = currElem.node;
+        var currPath  = currElem.path;
+        var currDepth = currElem.depth;
+
+        var pIndex = currDepth + 1;
+        if(pIndex >= path.length) {
+          callback(currPath, currNode);
+        } else {
+          var fValues = fieldValues[path[pIndex].name];
+
+          for(var j = 0; j < fValues.length; j++) {
+            var fieldValue = fValues[j];
+            var nextPath = currPath.slice();
+            if(fieldType === 'all' || path[pIndex].type === fieldType) {
+              nextPath.push(fieldValue);
+            }
+
+            if(!(fieldValue in currNode)) {
+              callback(nextPath, [])
+            } else {
+              stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
+            }
+          }
+        }
+      }
+    }
+
     var result = {
       values: function(fieldName) {
         if(tree.isEmpty()) {
@@ -149,78 +216,63 @@ function swivel(initData) {
         }
       },
 
+      pivotFieldValues: function() {
+        var fieldValues = [];
+
+        for(var i = 0; i < path.length; i++) {
+          if(path[i].type === 'pivot')
+            fieldValues[i] = this.values(path[i].name).sort();
+        }
+
+        return fieldValues;
+      },
+
       /*
        * @param fType  Field Type either 'group', 'pivot', or 'all'
        * @param tOrder Traversal order either 'depth' or 'breadth'
        */
       pathValues: function(fieldType, tOrder) {
-        if(typeof(fieldType) === 'undefined')
-          fieldType = 'all'
-
-        if(typeof(tOrder) === 'undefined')
-          tOrder = 'depth'
-
-        var stack = [];
         var pathValues = {};
 
-        var initStack = function() {
-          stack.push({
-            depth: -1, path: [],
-            node: tree.getRoot()
-          });
-        }
-
-        var addPathValues = function(pathKey, values) {
+        traverseFields(fieldType, tOrder, function(pathKey, values) {
           if(pathKey in pathValues) {
             pathValues[pathKey].values.concat(values);
           } else {
             pathValues[pathKey] = { path: pathKey, values: values };
           }
-        };
-
-        var fieldValues = {}
-        for(var i = 0; i < path.length; i++) {
-          var fieldName = path[i].name;
-          fieldValues[fieldName] = this.values(fieldName).sort();
-        }
-
-        initStack();
-        while(stack.length > 0) {
-          if(tOrder === 'depth') {
-            var currElem = stack.pop();
-          } else if(tOrder === 'breadth') {
-            var currElem = stack.shift();
-          } else {
-            throw "Unknown Traversal Order " + tOrder
-          }
-
-          var currNode  = currElem.node;
-          var currPath  = currElem.path;
-          var currDepth = currElem.depth;
-
-          var pIndex = currDepth + 1;
-          if(pIndex >= path.length) {
-            addPathValues(currPath, currNode);
-          } else {
-            var fValues = fieldValues[path[pIndex].name];
-
-            for(var j = 0; j < fValues.length; j++) {
-              var fieldValue = fValues[j];
-              var nextPath = currPath.slice();
-              if(fieldType === 'all' || path[pIndex].type === fieldType) {
-                nextPath.push(fieldValue);
-              }
-
-              if(!(fieldValue in currNode)) {
-                addPathValues(nextPath, [])
-              } else {
-                stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
-              }
-            }
-          }
-        }
+        });
 
         return pathValues;
+      },
+
+      prefixValues: function(fieldType, tOrder) {
+        var prefixVals = {};
+
+        traverseFields(fieldType, tOrder, function(pathKey, values) {
+          for(var i = 0; i < pathKey.length; i++) {
+            var prefixLen = i + 1;
+            var prefixKey = pathKey.slice(0, prefixLen);
+
+            if(!(prefixLen in prefixVals)) {
+              prefixVals[prefixLen] = {};
+            }
+
+            if(prefixKey in prefixVals) {
+              prefixVals[prefixLen][prefixKey].values.concat(values);
+            } else {
+              prefixVals[prefixLen][prefixKey] = { prefix: prefixKey, values: values };
+            }
+          }
+        });
+
+        for(prefixLen in prefixVals) {
+          for(prefixKey in prefixVals[prefixLen]) {
+            var values = prefixVals[prefixLen][prefixKey].values;
+            prefixVals[prefixLen][prefixKey].values = swivel.uniq(values);
+          }
+        }
+
+        return prefixVals;
       }
     };
 
