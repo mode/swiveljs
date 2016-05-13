@@ -104,9 +104,10 @@ app.controller("PivotTableController", ['$scope', function($scope) {
           field.selection = { group: groupName };
         }
       });
-
-      renderTable();
     });
+
+
+    renderTable();
   }
 
   var dateFormat = d3.time.format("%Y-%m-%d");
@@ -134,8 +135,6 @@ app.controller("PivotTableController", ['$scope', function($scope) {
 
     pivoted = pivoted.all();
 
-    console.log(pivoted);
-
     var sortedData = pivoted.data.sort(function(r1, r2) {
       var v1 = r1[$scope.rows];
       var v2 = r2[$scope.rows];
@@ -149,13 +148,8 @@ app.controller("PivotTableController", ['$scope', function($scope) {
       }
     });
 
-    // pivoted.eachGroupValue(function(stack) {
-    //   console.log("GOT A STACK!");
-    // });
-
-    pivoted.eachGroupValue(function(pathKey, values) {
-      console.log(pathKey, values);
-    });
+    // var groupValues = pivoted.groupPathValues();
+    var pivotValues = pivoted.pathValues('pivot');
 
     var columnValues = pivoted.values($scope.columns).sort();
 

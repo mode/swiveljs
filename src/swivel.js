@@ -149,101 +149,65 @@ function swivel(initData) {
         }
       },
 
-      // Depth First Traversal
-      // What do we really want here?
-      //  this is basically the index in its natural order
-      eachGroupValue: function(callback) {
+      pathValues: function(pathType) {
         var stack = [];
         var pathValues = {};
 
-        stack.push({ depth: -1, path: [], node: tree.getRoot() } );
+        var initStack = function() {
+          stack.push({
+            depth: -1, path: [],
+            node: tree.getRoot()
+          });
+        }
+
+        var addPathValues = function(pathKey, values) {
+          if(pathKey in pathValues) {
+            pathValues[pathKey].values.concat(values);
+          } else {
+            pathValues[pathKey] = { path: pathKey, values: values };
+          }
+        };
+
+        var fieldValues = {}
+        for(var i = 0; i < path.length; i++) {
+          var fieldName = path[i].name;
+          fieldValues[fieldName] = this.values(fieldName);
+        }
 
         while(stack.length > 0) {
-          var currElem = stack.pop();
+          if(pathType == 'group') {
+            var currElem = stack.pop();
+          } else {
+            var currElem = stack.unshift();
+          }
+
           var currNode  = currElem.node;
           var currPath  = currElem.path;
           var currDepth = currElem.depth;
 
-          if(typeof(currNode) != 'undefined') {
-            var pIndex = currDepth + 1;
+          var pIndex = currDepth + 1;
+          if(pIndex >= path.length) {
+            addPathValues(currPath, currNode);
+          } else {
+            var fValues = fieldValues[path[pIndex].name];
 
-            if(pIndex >= path.length) {
-              var pathKey = currPath.join(':');
-              if(typeof(pathValues[pathKey]) == 'undefined') {
-                pathValues[pathKey] = currNode;
-              } else {
-                pathValues[pathKey].concat(currNode);
+            for(var j = 0; j < fValues.length; j++) {
+              var fieldValue = fValues[j];
+              var nextPath = currPath.slice();
+              if(path[pIndex].type == pathType) {
+                nextPath.push(fieldValue);
               }
-            } else {
-              var fValues  = this.values(path[pIndex].name);
 
-              for(var j = 0; j < fValues.length; j++) {
-                var fieldValue = fValues[j];
-                if(fieldValue in currNode) {
-                  if(path[pIndex].type == 'pivot') {
-                    var nextPath = currPath.slice(0);
-                  } else {
-                    var nextPath = currPath.slice(0).concat(fieldValue);
-                  }
-
-                  stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
-                }
+              if(!(fieldValue in currNode)) {
+                addPathValues(nextPath, [])
+              } else {
+                stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
               }
             }
           }
         }
 
-        for(pathKey in pathValues) {
-          callback(pathKey, pathValues[pathKey])
-        }
-      },
-
-      // Breadth First Traversal
-      eachPivotValue: function(callback) {
-        var stack = [];
-        var pathValues = {};
-
-        stack.push({ depth: -1, path: [], node: tree.getRoot() } );
-
-
-        while(stack.length > 0) {
-          var currElem = stack.shift();
-          var currNode  = currElem.node;
-          var currPath  = currElem.path;
-          var currDepth = currElem.depth;
-
-          if(typeof(currNode) != 'undefined') {
-            var pIndex = currDepth + 1;
-
-            if(pIndex >= path.length) {
-              var pathKey = currPath.join(':');
-              if(typeof(pathValues[pathKey]) == 'undefined') {
-                pathValues[pathKey] = currNode;
-              } else {
-                pathValues[pathKey].concat(currNode);
-              }
-            } else {
-              var fValues  = this.values(path[pIndex].name);
-
-              for(var j = 0; j < fValues.length; j++) {
-                var fieldValue = fValues[j];
-                if(fieldValue in currNode) {
-                  if(path[pIndex].type == 'pivot') {
-                    var nextPath = currPath.slice(0);
-                  } else {
-                    var nextPath = currPath.slice(0).concat(fieldValue);
-                  }
-
-                  stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
-                }
-              }
-            }
-          }
-        }
-
-        for(pathKey in pathValues) {
-          callback(pathKey, pathValues[pathKey])
-        }
+        return pathValues;
       }
     };
 
