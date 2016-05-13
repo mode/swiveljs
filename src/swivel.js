@@ -154,10 +154,10 @@ function swivel(initData) {
        * @param tOrder Traversal order either 'depth' or 'breadth'
        */
       pathValues: function(fieldType, tOrder) {
-        if(typeof(fType) == 'undefined')
+        if(typeof(fieldType) === 'undefined')
           fieldType = 'all'
 
-        if(typeof(tOrder) == 'undefined')
+        if(typeof(tOrder) === 'undefined')
           tOrder = 'depth'
 
         var stack = [];
@@ -181,7 +181,7 @@ function swivel(initData) {
         var fieldValues = {}
         for(var i = 0; i < path.length; i++) {
           var fieldName = path[i].name;
-          fieldValues[fieldName] = this.values(fieldName);
+          fieldValues[fieldName] = this.values(fieldName).sort();
         }
 
         initStack();

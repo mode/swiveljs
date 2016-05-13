@@ -149,13 +149,18 @@ app.controller("PivotTableController", ['$scope', function($scope) {
     });
 
     // var groupValues = pivoted.groupPathValues();
-    var pivotValues = pivoted.pathValues();
-
-    console.log(pivotValues);
+    var pivotValues = pivoted.pathValues('pivot', 'breadth');
 
     for(pathKey in pivotValues) {
       console.log(pivotValues[pathKey].path);
     }
+
+    // now we just need to do a traversal of this pivotValues structure
+    //  each time we scan and cache the value in a particular position until
+    //  we see a new one and then we drop it into its position we can set the colspan
+    //  of the td that we're currently on.. once we've gotten through all the values
+    //  in that position we can go onto the next tr and so on and so on.. it's a Traversal
+    //  of a tree but in a flat orientation.. feels like another breadth first traversal
 
     var columnValues = pivoted.values($scope.columns).sort();
 
@@ -164,6 +169,7 @@ app.controller("PivotTableController", ['$scope', function($scope) {
     var table = d3.select("#pivot-container").append("table").attr('class', 'table'),
       thead = table.append("thead"),
       tbody = table.append("tbody");
+
 
     // thead.append("tr")
     //   .selectAll("td")
