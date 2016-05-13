@@ -153,7 +153,7 @@ app.controller("PivotTableController", ['$scope', function($scope) {
     //   console.log("GOT A STACK!");
     // });
 
-    pivoted.eachPivotValue(function(pathKey, values) {
+    pivoted.eachGroupValue(function(pathKey, values) {
       console.log(pathKey, values);
     });
 

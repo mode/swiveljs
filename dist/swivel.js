@@ -154,6 +154,7 @@ function swivel(initData) {
       //  this is basically the index in its natural order
       eachGroupValue: function(callback) {
         var stack = [];
+        var pathValues = {};
 
         stack.push({ depth: -1, path: [], node: tree.getRoot() } );
 
@@ -167,19 +168,33 @@ function swivel(initData) {
             var pIndex = currDepth + 1;
 
             if(pIndex >= path.length) {
-              console.log(currPath);
+              var pathKey = currPath.join(':');
+              if(typeof(pathValues[pathKey]) == 'undefined') {
+                pathValues[pathKey] = currNode;
+              } else {
+                pathValues[pathKey].concat(currNode);
+              }
             } else {
               var fValues  = this.values(path[pIndex].name);
 
               for(var j = 0; j < fValues.length; j++) {
                 var fieldValue = fValues[j];
                 if(fieldValue in currNode) {
-                  var nextPath = currPath.slice(0).concat(fieldValue);
+                  if(path[pIndex].type == 'pivot') {
+                    var nextPath = currPath.slice(0);
+                  } else {
+                    var nextPath = currPath.slice(0).concat(fieldValue);
+                  }
+
                   stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
                 }
               }
             }
           }
+        }
+
+        for(pathKey in pathValues) {
+          callback(pathKey, pathValues[pathKey])
         }
       },
 
