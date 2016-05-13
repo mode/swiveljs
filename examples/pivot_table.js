@@ -149,9 +149,13 @@ app.controller("PivotTableController", ['$scope', function($scope) {
       }
     });
 
-    pivoted.eachGroupValue(function(stack) {
-      console.log("GOT A STACK!");
-    })
+    // pivoted.eachGroupValue(function(stack) {
+    //   console.log("GOT A STACK!");
+    // });
+
+    pivoted.eachPivotValue(function(pathKey, values) {
+      console.log(pathKey, values);
+    });
 
     var columnValues = pivoted.values($scope.columns).sort();
 

@@ -185,20 +185,50 @@ function swivel(initData) {
 
       // Breadth First Traversal
       eachPivotValue: function(callback) {
-        var queue = [tree.getRoot()];
+        var stack = [];
+        var pathValues = {};
 
-        while(queue.length > 0) {
+        stack.push({ depth: -1, path: [], node: tree.getRoot() } );
 
+
+        while(stack.length > 0) {
+          var currElem = stack.shift();
+          var currNode  = currElem.node;
+          var currPath  = currElem.path;
+          var currDepth = currElem.depth;
+
+          if(typeof(currNode) != 'undefined') {
+            var pIndex = currDepth + 1;
+
+            if(pIndex >= path.length) {
+              var pathKey = currPath.join(':');
+              if(typeof(pathValues[pathKey]) == 'undefined') {
+                pathValues[pathKey] = currNode;
+              } else {
+                pathValues[pathKey].concat(currNode);
+              }
+            } else {
+              var fValues  = this.values(path[pIndex].name);
+
+              for(var j = 0; j < fValues.length; j++) {
+                var fieldValue = fValues[j];
+                if(fieldValue in currNode) {
+                  if(path[pIndex].type == 'pivot') {
+                    var nextPath = currPath.slice(0);
+                  } else {
+                    var nextPath = currPath.slice(0).concat(fieldValue);
+                  }
+
+                  stack.push({ depth: pIndex, path: nextPath, node: currNode[fieldValue] });
+                }
+              }
+            }
+          }
         }
-        // we could potentially call this where the depth was the pathIndex
-        //  how do we know what path index we'd need to be on?.. We'd hit a point
-        //  in the queue where the field names don't match? I think if every time
-        //  we stored something in the queue we also put what field it belonged to
-        //  then we would know how to scan for taht nodes children... that's the actual
-        //  hard part is finding the children of the element that we're poking around
-        //  at from the queue..
 
-        // in the queue put { node: ..., depth: 0 }
+        for(pathKey in pathValues) {
+          callback(pathKey, pathValues[pathKey])
+        }
       }
     };
 
