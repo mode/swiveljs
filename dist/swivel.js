@@ -245,8 +245,29 @@ function swivel(initData) {
         return pathValues;
       },
 
+      pathCounts: function(fieldType, tOrder) {
+        var pathCounts = { depth: -1, name: 'root', children: {} };
+
+        traverseFields(fieldType, tOrder, function(pathKey, values) {
+          var currNode = pathCounts;
+
+          for(var i = 0; i < pathKey.length; i++) {
+            var pathVal = pathKey[i];
+            if(!(pathVal in currNode.children)) {
+              currNode.children[pathVal] = { depth: i, name: pathVal, children: {} };
+            }
+
+            currNode = currNode.children[pathVal];
+          }
+        });
+
+        return pathCounts;
+      },
+
       prefixValues: function(fieldType, tOrder) {
         var prefixVals = {};
+
+        // build a prefix trie with counts here
 
         traverseFields(fieldType, tOrder, function(pathKey, values) {
           for(var i = 0; i < pathKey.length; i++) {

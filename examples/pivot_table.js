@@ -154,24 +154,36 @@ app.controller("PivotTableController", ['$scope', function($scope) {
       thead = table.append("thead"),
       tbody = table.append("tbody");
 
-    // oh.. we should just do this as the unique values of each field
-    var pfValues = pivoted.pivotFieldValues();
+    // Build Nested Headers
+    var queue = [];
+    var lastDepth = -1;
 
-    console.log(pfValues);
+    var root = pivoted.pathCounts('pivot', 'breadth');
+    var childKeys = Object.keys(root.children).sort();
 
-    for(fieldPos in pfValues) {
-      var subFields = pfValues.slice(i + 1, pfValues.length - (i + 1));
+    for(var i = 0; i < childKeys.length; i++) {
+      queue.push(root.children[childKeys[i]]);
+    }
 
-      var colspan = 1;
-      for(var j = 0; j < subFields.length; j++) {
-        colspan *= subFields[j].length;
+    while(queue.length > 0) {
+      var tr;
+      var currNode = queue.shift();
+
+      if(lastDepth != currNode.depth) {
+        tr = thead.append("tr");
+        lastDepth = currNode.depth;
       }
-      console.log(pfValues);
 
-      var tr = thead.append("tr");
-      for(var k = 0; k < pfValues[i].length; k++) {
-        var label = pfValues[i][k];
-        tr.append("td").attr("colspan", colspan).text(label);
+      var childKeys = Object.keys(currNode.children).sort();
+
+      if(childKeys.length == 0) {
+        tr.append("td").text(currNode.name);
+      } else {
+        tr.append("td").attr("colspan", childKeys.length).text(currNode.name);
+
+        for(var i = 0; i < childKeys.length; i++) {
+          queue.push(currNode.children[childKeys[i]]);
+        }
       }
     }
 
