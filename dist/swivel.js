@@ -155,7 +155,7 @@ function swivel(initData) {
         fieldType = 'all'
 
       if(typeof(tOrder) === 'undefined')
-        tOrder = 'depth'
+        tOrder = 'dfs'
 
       var initStack = function() {
         stack.push({
@@ -172,9 +172,9 @@ function swivel(initData) {
 
       initStack();
       while(stack.length > 0) {
-        if(tOrder === 'depth') {
+        if(tOrder === 'dfs') {
           var currElem = stack.pop();
-        } else if(tOrder === 'breadth') {
+        } else if(tOrder === 'bfs') {
           var currElem = stack.shift();
         } else {
           throw "Unknown Traversal Order " + tOrder
@@ -245,23 +245,33 @@ function swivel(initData) {
         return pathValues;
       },
 
-      pathCounts: function(fieldType, tOrder) {
-        var pathCounts = { depth: -1, name: 'root', children: {} };
+      subTree: function(fieldType, tOrder) {
+        var subTree = { depth: -1, name: 'root', children: {} };
 
         traverseFields(fieldType, tOrder, function(pathKey, values) {
-          var currNode = pathCounts;
+          var currNode = subTree;
 
           for(var i = 0; i < pathKey.length; i++) {
             var pathVal = pathKey[i];
+
             if(!(pathVal in currNode.children)) {
-              currNode.children[pathVal] = { depth: i, name: pathVal, children: {} };
+              currNode.children[pathVal] = { depth: i, name: pathVal, children: {}, counter: 0, visited: false };
             }
+
+            // record the total number of branches under this node
+            currNode.children[pathVal].counter += 1;
+
+            if(i == pathKey.length - 1) {
+              currNode.children[pathVal].values = values;
+            }
+
+            // can we get a leaf counter in here?
 
             currNode = currNode.children[pathVal];
           }
         });
 
-        return pathCounts;
+        return subTree;
       },
 
       prefixValues: function(fieldType, tOrder) {

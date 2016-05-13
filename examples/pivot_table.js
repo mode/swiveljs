@@ -154,38 +154,105 @@ app.controller("PivotTableController", ['$scope', function($scope) {
       thead = table.append("thead"),
       tbody = table.append("tbody");
 
-    // Build Nested Headers
-    var queue = [];
-    var lastDepth = -1;
+    var pivotRoot = pivoted.subTree('pivot', 'bfs');
+    var pivotKeys = Object.keys(pivotRoot.children).sort();
 
-    var root = pivoted.pathCounts('pivot', 'breadth');
-    var childKeys = Object.keys(root.children).sort();
+    var groupRoot = pivoted.subTree('group', 'dfs');
+    var groupKeys = Object.keys(groupRoot.children).sort();
 
-    for(var i = 0; i < childKeys.length; i++) {
-      queue.push(root.children[childKeys[i]]);
-    }
+    var insertHead = function() {
+      var queue = [];
+      var lastDepth = -1;
 
-    while(queue.length > 0) {
-      var tr;
-      var currNode = queue.shift();
-
-      if(lastDepth < currNode.depth) {
-        tr = thead.append("tr");
-        lastDepth = currNode.depth;
+      for(var i = 0; i < pivotKeys.length; i++) {
+        queue.push(pivotRoot.children[pivotKeys[i]]);
       }
 
-      var childKeys = Object.keys(currNode.children).sort();
+      while(queue.length > 0) {
+        var tr;
+        var currNode = queue.shift();
 
-      if(childKeys.length == 0) {
-        tr.append("td").text(currNode.name);
-      } else {
-        tr.append("td").attr("colspan", childKeys.length).text(currNode.name);
+        if(lastDepth != currNode.depth) {
+          tr = thead.append("tr");
+          lastDepth = currNode.depth;
+        }
 
-        for(var i = 0; i < childKeys.length; i++) {
-          queue.push(currNode.children[childKeys[i]]);
+        var childKeys = Object.keys(currNode.children).sort();
+
+        if(childKeys.length == 0) {
+          tr.append("td").text(currNode.name);
+        } else {
+          tr.append("td").attr("colspan", childKeys.length).text(currNode.name);
+
+          for(var i = 0; i < childKeys.length; i++) {
+            queue.push(currNode.children[childKeys[i]]);
+          }
         }
       }
     }
+
+    var insertBody = function() {
+      var visitPivots = function(callback) {
+        var queue = [];
+
+        for(var i = 0; i < pivotKeys.length; i++) {
+          queue.push(pivotRoot.children[pivotKeys[i]]);
+        }
+
+        while(queue.length > 0) {
+          var currNode  = queue.shift();
+          var childKeys = Object.keys(currNode.children).sort();
+
+          if(childKeys.length == 0) {
+            callback(currNode.values);
+          } else {
+            for(var i = 0; i < childKeys.length; i++) {
+              queue.push(currNode.children[childKeys[i]]);
+            }
+          }
+        }
+      };
+
+      var insertNode = function(node, path, depth) {
+        var childKeys = Object.keys(node.children).sort();
+
+        if(childKeys.length == 0) {
+          var tr = tbody.append("tr");
+          for(var i = 0; i < path.length; i++) {
+            if(!path[i].visited) {
+              path[i].visited = true;
+              console.log(path[i]);
+              tr.append("td").attr("rowspan", path[i].counter).text(path[i].name);
+            }
+
+            if(i == path.length - 1) {
+              visitPivots(function(pivotValues) {
+                // replace with swivel.intersect();
+                tr.append("td").text("val");
+                //console.log($(path[i].values).filter(pivotValues));
+              });
+            }
+          }
+
+
+          // do the damn pivot table recursion
+
+        } else {
+          for(var i = 0; i < childKeys.length; i++) {
+            var child = node.children[childKeys[i]];
+
+            path.push(child)
+            insertNode(child, path, depth + 1);
+            path.pop();
+          }
+        }
+      }
+
+      insertNode(groupRoot, [], 0);
+    }
+
+    insertHead();
+    insertBody();
 
     // Now how do we build the rows? Probably the exact same way..
     //   is it a breadth first traversal of the the values tree?
