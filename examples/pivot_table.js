@@ -149,7 +149,13 @@ app.controller("PivotTableController", ['$scope', function($scope) {
     });
 
     // var groupValues = pivoted.groupPathValues();
-    var pivotValues = pivoted.pathValues('pivot');
+    var pivotValues = pivoted.pathValues();
+
+    console.log(pivotValues);
+
+    for(pathKey in pivotValues) {
+      console.log(pivotValues[pathKey].path);
+    }
 
     var columnValues = pivoted.values($scope.columns).sort();
 
