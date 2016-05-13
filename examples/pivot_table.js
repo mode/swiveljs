@@ -221,7 +221,6 @@ app.controller("PivotTableController", ['$scope', function($scope) {
           for(var i = 0; i < path.length; i++) {
             if(!path[i].visited) {
               path[i].visited = true;
-              console.log(path[i]);
               tr.append("td").attr("rowspan", path[i].counter).text(path[i].name);
             }
 

@@ -255,16 +255,18 @@ function swivel(initData) {
             var pathVal = pathKey[i];
 
             if(!(pathVal in currNode.children)) {
+              // ONLY IF IT'S NEW UPDATE MY PARENTS....
+              //   it's new
+              currNode.counter += 1;
               currNode.children[pathVal] = { depth: i, name: pathVal, children: {}, counter: 0, visited: false };
             }
 
-            // record the total number of branches under this node
-            currNode.children[pathVal].counter += 1;
-
             if(i == pathKey.length - 1) {
+              // currNode.children[pathVal].counter += 1;
               currNode.children[pathVal].values = values;
-            }
 
+              // really what I want to do is find all the parents of this path and increment their counters
+            }
             // can we get a leaf counter in here?
 
             currNode = currNode.children[pathVal];
