@@ -246,7 +246,11 @@ function swivel(initData) {
       },
 
       subTree: function(fieldType, tOrder) {
-        var subTree = { depth: -1, name: 'root', children: {} };
+        var subTree = { depth: -1, name: 'root', counter: 0, children: {} };
+
+        var incrPathCounters = function(pathKey) {
+          var currNode = subTree;
+        }
 
         traverseFields(fieldType, tOrder, function(pathKey, values) {
           var currNode = subTree;
@@ -255,19 +259,20 @@ function swivel(initData) {
             var pathVal = pathKey[i];
 
             if(!(pathVal in currNode.children)) {
-              // ONLY IF IT'S NEW UPDATE MY PARENTS....
-              //   it's new
-              currNode.counter += 1;
-              currNode.children[pathVal] = { depth: i, name: pathVal, children: {}, counter: 0, visited: false };
+              if(i == pathKey.length - 1) { // Turning over a new leaf
+                var prevNode = currNode;
+                while(parent in prevNode) {
+                  prevNode.counter += 1;
+                  prevNode = prevNode.parent;
+                }
+              }
+
+              currNode.children[pathVal] = { depth: i, name: pathVal, parent: currNode, children: {}, counter: 0, visited: false };
             }
 
             if(i == pathKey.length - 1) {
-              // currNode.children[pathVal].counter += 1;
               currNode.children[pathVal].values = values;
-
-              // really what I want to do is find all the parents of this path and increment their counters
             }
-            // can we get a leaf counter in here?
 
             currNode = currNode.children[pathVal];
           }
@@ -342,8 +347,6 @@ function swivel(initData) {
         tree.insert(row, rowIdx);
       }
     }
-
-    console.log(tree.getRoot())
   }
 
   function getPathFields() {
